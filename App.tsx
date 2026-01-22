@@ -1,7 +1,19 @@
-import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
-const todos = ["1", "2", "3"];
+const todos = [{
+  id: 1,
+  title: "title",
+  description: "description",
+},
+{
+  id: 2,
+  title: "title",
+  description: "description",
+}, {
+  id: 3,
+  title: "title",
+  description: "description",
+}];
 
 export default function App() {
   return (
@@ -27,8 +39,12 @@ export default function App() {
       {todos.map((todo) => {
         return (
           <View
-            style={{ width: "95%", height: 80, backgroundColor: "#FFFFFF", borderRadius: 8, boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)" }}
-          ></View>
+            key={todo.id}
+            style={{ padding: 16, width: "95%", height: 80, backgroundColor: "#FFFFFF", borderRadius: 8, boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)" }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "bold" }}>{todo.title}</Text>
+            <Text style={{ fontSize: 14 }}>{todo.description}</Text>
+          </View>
         );
       })}
     </View>
