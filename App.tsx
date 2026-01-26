@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Button, Modal, Pressable } from "react-native";
+import Todo from "./components/Todo/Todo";
+import { TodoItem } from "./components/Todo/types/todo";
 
-const todos = [
+const todos: TodoItem[] = [
   {
     id: 1,
     title: "title",
@@ -106,31 +108,7 @@ export default function App() {
       >
         {todos.map((todo) => {
           return (
-            <Pressable
-              onPress={() => setShowExtraId(todo.id)}
-              key={todo.id}
-              style={{
-                padding: 16,
-                width: "95%",
-                height: 80,
-                backgroundColor: "#FFFFFF",
-                borderRadius: 8,
-                boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-              }}>
-
-              <View
-                key={todo.id}
-
-              >
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                  {todo.title}
-                </Text>
-                <Text style={{ fontSize: 14 }}>{todo.description}</Text>
-              </View>
-              {
-                showExtraId === todo.id && <View><Text>{todo.extraInfo}</Text></View>
-              }
-            </Pressable>
+            <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={todo} key={todo.id} />
           );
         })}
       </ScrollView>
