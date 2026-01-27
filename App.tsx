@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Button, Modal, Pressable } from "react-native";
+import { View, Text, ScrollView, Button, Modal } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./components/Todo/types/todo";
+import { styles } from "./styles"
 
 const todos: TodoItem[] = [
   {
@@ -73,21 +74,10 @@ export default function App() {
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor: "#EFD9F6",
-      }}
+      style={styles.appContainer}
     >
       <View
-        style={{
-          width: "100%",
-          height: 50,
-          backgroundColor: "#9C51B6",
-          marginTop: 50,
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
+        style={styles.appHeader}
       >
         <View style={{ width: 100 }}>
           <Button title="Add" onPress={() => console.log("pressed")} />
@@ -97,14 +87,7 @@ export default function App() {
         </View>
       </View>
       <ScrollView
-        style={{ width: "100%" }}
-        contentContainerStyle={{
-          alignItems: "center",
-          rowGap: 24,
-          justifyContent: "flex-start",
-          paddingTop: 16,
-          paddingBottom: 52,
-        }}
+        contentContainerStyle={styles.appScrollableContainer}
       >
         {todos.map((todo) => {
           return (
