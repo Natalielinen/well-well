@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Button, Modal } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./components/Todo/types/todo";
 import { styles } from "./styles"
+import AddButton from "./components/AddButton/AddButton";
 
 const todos: TodoItem[] = [
   {
@@ -79,12 +80,10 @@ export default function App() {
       <View
         style={styles.appHeader}
       >
-        <View style={{ width: 100 }}>
-          <Button title="Add" onPress={() => console.log("pressed")} />
-        </View>
-        <View style={{ width: 100 }}>
+        <AddButton />
+        {/* <View style={{ width: 100 }}>
           <Button title="Exit" onPress={() => setExitModalVisible(true)} />
-        </View>
+        </View> */}
       </View>
       <ScrollView
         contentContainerStyle={styles.appScrollableContainer}

@@ -10,9 +10,10 @@ export const styles = StyleSheet.create({
     height: 50,
     backgroundColor: "#9C51B6",
     marginTop: 50,
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingHorizontal: 16,
   },
   appScrollableContainer: {
     width: "100%",
@@ -37,4 +38,17 @@ export const styles = StyleSheet.create({
   todoDescription: {
     fontSize: 14,
   },
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: "50%",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addButtonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#9C51B6",
+  }
 });
