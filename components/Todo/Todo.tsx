@@ -7,7 +7,8 @@ type TodoProps = {
     showExtraId: number | null;
     setShowExtraId: (id: number | null) => void
 };
-
+//TODO: добавить цветную полосу в зависимости от веса задачи
+// TODO: добавить чекбокс для отметки сделанных дел
 export default function Todo({ todo, showExtraId, setShowExtraId }: TodoProps) {
 
     const onPress = () => {

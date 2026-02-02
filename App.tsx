@@ -8,8 +8,8 @@ import AddButton from "./components/AddButton/AddButton";
 const todos: TodoItem[] = [
   {
     id: 1,
-    title: "title",
-    description: "description",
+    title: "Помыть посуду",
+    description: "Помыть всю посуду в раковине.",
     extraInfo: "extraInfo",
   },
   {
@@ -80,10 +80,11 @@ export default function App() {
       <View
         style={styles.appHeader}
       >
+        {/* TODO: добавить бургер меню */}
         <AddButton />
-        {/* <View style={{ width: 100 }}>
-          <Button title="Exit" onPress={() => setExitModalVisible(true)} />
-        </View> */}
+      </View>
+      <View style={styles.date}>
+        <Text style={styles.dateText}> Сегодня: 02.02.2026 </Text>
       </View>
       <ScrollView
         contentContainerStyle={styles.appScrollableContainer}
