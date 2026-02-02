@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Button, Modal } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./components/Todo/types/todo";
 import { styles } from "./styles"
-import AddButton from "./components/AddButton/AddButton";
+import CustomButton from "./ui/CustomButton/CustomButton";
 
 const todos: TodoItem[] = [
   {
@@ -81,10 +81,12 @@ export default function App() {
         style={styles.appHeader}
       >
         {/* TODO: добавить бургер меню */}
-        <AddButton />
+        <CustomButton onClick={() => console.log("click")} text="+" variant="secondary" />
       </View>
       <View style={styles.date}>
+        <CustomButton onClick={() => console.log("left")} text="<" variant="ghost" />
         <Text style={styles.dateText}> Сегодня: 02.02.2026 </Text>
+        <CustomButton onClick={() => console.log("right")} text=">" variant="ghost" />
       </View>
       <ScrollView
         contentContainerStyle={styles.appScrollableContainer}

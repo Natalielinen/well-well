@@ -22,6 +22,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 8
   },
   dateText: {
     fontSize: 16,
@@ -54,16 +55,26 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
   },
-  addButton: {
+  customButton: {
     width: 40,
     height: 40,
     borderRadius: "50%",
-    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
   },
-  addButtonText: {
+  primary: {
+    backgroundColor: colors.primary,
+  },
+  secondary: {
+    backgroundColor: colors.background,
+    
+  },
+  ghost: {
+    backgroundColor: "transparent",
+    boxShadow: "none",
+  },
+  customButtonText: {
     fontSize: 18,
     fontWeight: "bold",
     color: colors.textPrimary,
