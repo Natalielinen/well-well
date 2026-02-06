@@ -1,5 +1,8 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import { colors } from "./themes/colors";
+
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 
 export const styles = StyleSheet.create({
   appContainer: {
@@ -8,7 +11,7 @@ export const styles = StyleSheet.create({
   },
   appHeader: {
     width: "100%",
-    height: 50,
+    height: "6%",
     backgroundColor: colors.background,
     marginTop: 50,
     flexDirection: "row",
@@ -18,14 +21,14 @@ export const styles = StyleSheet.create({
   },
   date: {
     width: "100%",
-    padding: 8,
+    padding: "1%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 8
+    marginTop: "1%"
   },
   dateText: {
-    fontSize: 16,
+    fontSize: windowWidth > 500 ? 32 : 16,
     fontWeight: "600",
     color: colors.textPrimary,
   },
@@ -35,7 +38,7 @@ export const styles = StyleSheet.create({
     rowGap: 24,
     justifyContent: "flex-start",
     paddingTop: 16,
-    paddingBottom: 52,
+    paddingBottom: "14%",
   },
   todoItem: {
     padding: 12,
@@ -46,18 +49,18 @@ export const styles = StyleSheet.create({
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
   },
   todoTitle: {
-    fontSize: 18,
+    fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
     color: colors.textPrimary,
   },
   todoDescription: {
     marginTop: 4,
-    fontSize: 13,
+    fontSize: windowWidth > 500 ? 26 : 13,
     color: colors.textSecondary,
   },
   customButton: {
-    width: 40,
-    height: 40,
+    width: windowWidth > 500 ? 80 : 40,
+    height: windowWidth > 500 ? 80 : 40,
     borderRadius: "50%",
     justifyContent: "center",
     alignItems: "center",
@@ -75,7 +78,7 @@ export const styles = StyleSheet.create({
     boxShadow: "none",
   },
   customButtonText: {
-    fontSize: 18,
+    fontSize: windowWidth > 500 ? 36 :18,
     fontWeight: "bold",
     color: colors.textPrimary,
   }
