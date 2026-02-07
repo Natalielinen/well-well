@@ -5,6 +5,10 @@ const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 export const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#EFD9F6",
+  },
   appContainer: {
     flex: 1,
     backgroundColor: "#EFD9F6",
@@ -13,7 +17,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: "6%",
     backgroundColor: colors.background,
-    marginTop: 50,
+    //marginTop: 50,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
@@ -38,7 +42,7 @@ export const styles = StyleSheet.create({
     rowGap: 24,
     justifyContent: "flex-start",
     paddingTop: 16,
-    paddingBottom: "14%",
+   paddingBottom: "4%",
   },
   todoItem: {
     padding: 12,
