@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Button, Modal } from "react-native";
+import { View, Text, ScrollView, Button, Modal, FlatList } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./components/Todo/types/todo";
@@ -90,7 +90,13 @@ export default function App() {
           <Text style={styles.dateText}> Сегодня: 02.02.2026 </Text>
           <CustomButton onClick={() => console.log("right")} text=">" variant="ghost" />
         </View>
-        <ScrollView
+
+        <FlatList contentContainerStyle={styles.appScrollableContainer} data={todos} renderItem={({ item }) => {
+          return <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={item} />
+        }} />
+
+
+        {/* <ScrollView
           contentContainerStyle={styles.appScrollableContainer}
         >
           {todos.map((todo) => {
@@ -98,7 +104,7 @@ export default function App() {
               <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={todo} key={todo.id} />
             );
           })}
-        </ScrollView>
+        </ScrollView> */}
         <Modal visible={exitModalVusible} onRequestClose={() => setExitModalVisible(false)} animationType="fade">
           <View>
             <Text>Are you sure you want to exit?</Text>

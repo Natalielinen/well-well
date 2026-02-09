@@ -37,12 +37,9 @@ export const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   appScrollableContainer: {
-    width: "100%",
-    alignItems: "center",
     rowGap: 24,
-    justifyContent: "flex-start",
     paddingTop: 16,
-   paddingBottom: "4%",
+    paddingBottom: "4%",
   },
   todoItem: {
     padding: 12,
@@ -51,6 +48,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
+    alignSelf: "center",
   },
   todoTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
