@@ -60,6 +60,12 @@ export const styles = StyleSheet.create({
     fontSize: windowWidth > 500 ? 26 : 13,
     color: colors.textSecondary,
   },
+  emptyListText: {
+    fontSize: windowWidth > 500 ? 36 : 18,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    alignSelf: "center",
+  },
   customButton: {
     width: windowWidth > 500 ? 80 : 40,
     height: windowWidth > 500 ? 80 : 40,
@@ -83,5 +89,19 @@ export const styles = StyleSheet.create({
     fontSize: windowWidth > 500 ? 36 :18,
     fontWeight: "bold",
     color: colors.textPrimary,
+  },
+  backToTopButton: {
+    padding: 14,
+    width: "95%",
+    height: 50,
+    backgroundColor: "#ffffff8f",
+    borderRadius: 8,
+    alignSelf: "center",
+  },
+  backToTopButtonText: {
+    fontSize: windowWidth > 500 ? 36 : 18,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    alignSelf: "center",
   }
 });

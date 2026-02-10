@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Button, Modal, FlatList } from "react-native";
+import { View, Text, ScrollView, Button, Modal, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./components/Todo/types/todo";
@@ -91,20 +91,15 @@ export default function App() {
           <CustomButton onClick={() => console.log("right")} text=">" variant="ghost" />
         </View>
 
-        <FlatList contentContainerStyle={styles.appScrollableContainer} data={todos} renderItem={({ item }) => {
-          return <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={item} />
-        }} />
-
-
-        {/* <ScrollView
+        <FlatList
           contentContainerStyle={styles.appScrollableContainer}
-        >
-          {todos.map((todo) => {
-            return (
-              <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={todo} key={todo.id} />
-            );
-          })}
-        </ScrollView> */}
+          data={todos} renderItem={({ item }) => {
+            return <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={item} />
+          }}
+          ListEmptyComponent={<Text style={styles.emptyListText}>В списке нет дел</Text>}// TODO: добавить кастомный компонент
+          ListFooterComponent={<Pressable style={styles.backToTopButton}><Text style={styles.backToTopButtonText}>К началу списка ↑</Text></Pressable>}
+        />
+
         <Modal visible={exitModalVusible} onRequestClose={() => setExitModalVisible(false)} animationType="fade">
           <View>
             <Text>Are you sure you want to exit?</Text>
