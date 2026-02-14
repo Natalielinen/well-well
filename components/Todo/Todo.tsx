@@ -1,6 +1,7 @@
 import { Pressable, View, Text } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "../../styles";
+import { sizes } from "../../constants/todo";
 
 type TodoProps = {
     todo: TodoItem;
@@ -19,12 +20,18 @@ export default function Todo({ todo, showExtraId, setShowExtraId }: TodoProps) {
         <Pressable
             onPress={onPress}
             key={todo.id}
-            style={styles.todoItem}>
+            style={[styles.todoItem, todo.isExpired ? styles.expiredItem : {}]}>
 
             <View
                 key={todo.id}
-
             >
+                <View style={{
+                    backgroundColor: sizes[todo.size].color,
+                    height: 4,
+                    width: sizes[todo.size].lineWidth,
+                    borderRadius: 2,
+                    marginBottom: 4
+                }}></View>
                 <Text style={styles.todoTitle}>
                     {todo.title}
                 </Text>

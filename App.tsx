@@ -40,6 +40,39 @@ const todos: TodoItem[] = [
     nextDate: "2026-02-14",
     size: 3,
     isExpired: false
+  },
+  {
+    id: 5,
+    title: "test 2",
+    description: "",
+    lastUpdated: "2026-01-31",
+    isRepeat: true,
+    repeatFrequency: 14,
+    nextDate: "2026-02-14",
+    size: 5,
+    isExpired: false
+  },
+  {
+    id: 4,
+    title: "test",
+    description: "",
+    lastUpdated: "2026-01-31",
+    isRepeat: true,
+    repeatFrequency: 14,
+    nextDate: "2026-02-14",
+    size: 8,
+    isExpired: true
+  },
+  {
+    id: 6,
+    title: "test 3",
+    description: "",
+    lastUpdated: "2026-01-31",
+    isRepeat: true,
+    repeatFrequency: 14,
+    nextDate: "2026-02-14",
+    size: 13,
+    isExpired: false
   }
 
 ];

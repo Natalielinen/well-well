@@ -4,5 +4,5 @@ export const colors = {
     primary: "#636df149",
     textPrimary: "#1C1C1E",
     textSecondary: "#6E6E73",
-    divider: "#E5E5EA"
+    divider: "#E5E5EA",
 }

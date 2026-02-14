@@ -1,3 +1,5 @@
+export type Size = 1 | 3 | 5 | 8 | 13
+
 export type TodoItem = {
     id: number;
     title: string;
@@ -6,10 +8,12 @@ export type TodoItem = {
     isRepeat: boolean;
     repeatFrequency: number; // В днях
     nextDate: string; // Дата следующего выполнения Или дата начала, если нет даты последнего выполнения (новая задача)
-    size: number;
+    size: Size;
     isExpired: boolean;
     
 }
+
+export type SizeItem = Record<number, { time: string, color: string, lineWidth: number }>
 
 /*
 

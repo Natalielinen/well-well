@@ -50,6 +50,9 @@ export const styles = StyleSheet.create({
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
     alignSelf: "center",
   },
+  expiredItem: {
+    backgroundColor: "#d65f5f7c",
+  },
   todoTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
@@ -67,8 +70,6 @@ export const styles = StyleSheet.create({
     alignSelf: "center",
   },
   customButton: {
-    // width: windowWidth > 500 ? 80 : 40,
-    // height: windowWidth > 500 ? 80 : 40,
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
