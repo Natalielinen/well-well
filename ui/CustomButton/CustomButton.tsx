@@ -1,6 +1,6 @@
 import { Pressable, View, Text } from "react-native";
 import { styles } from "../../styles";
-import { ButtonVariant } from "../../components/Todo/types/ui";
+import { ButtonVariant } from "../../types/ui";
 
 type CustomButtonProps = {
     onClick: () => void;

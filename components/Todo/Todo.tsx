@@ -1,5 +1,5 @@
 import { Pressable, View, Text } from "react-native";
-import { TodoItem } from "./types/todo";
+import { TodoItem } from "../../types/todo";
 import { styles } from "../../styles";
 
 type TodoProps = {
@@ -30,9 +30,6 @@ export default function Todo({ todo, showExtraId, setShowExtraId }: TodoProps) {
                 </Text>
                 <Text style={styles.todoDescription}>{todo.description}</Text>
             </View>
-            {
-                showExtraId === todo.id && <View><Text>{todo.extraInfo}</Text></View>
-            }
         </Pressable>
     )
 }

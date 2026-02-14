@@ -7,11 +7,11 @@ const windowHeight = Dimensions.get("window").height;
 export const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: "#EFD9F6",
+    backgroundColor: colors.primary,
   },
   appContainer: {
     flex: 1,
-    backgroundColor: "#EFD9F6",
+    backgroundColor: colors.primary,
   },
   appHeader: {
     width: "100%",
@@ -67,12 +67,14 @@ export const styles = StyleSheet.create({
     alignSelf: "center",
   },
   customButton: {
-    width: windowWidth > 500 ? 80 : 40,
-    height: windowWidth > 500 ? 80 : 40,
-    borderRadius: "50%",
+    // width: windowWidth > 500 ? 80 : 40,
+    // height: windowWidth > 500 ? 80 : 40,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
+    paddingHorizontal: 12,
+    paddingVertical: 6
   },
   primary: {
     backgroundColor: colors.primary,
@@ -103,5 +105,25 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.textPrimary,
     alignSelf: "center",
+  },
+  addModalTitle: {
+    fontSize: windowWidth > 500 ? 36 : 18,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    alignSelf: "center",
+    padding: 12
+  },
+  input: {
+    height: 40,
+		margin: 12,
+		padding: 10,
+		borderWidth: 1,
+    borderRadius: 8,
+  },
+  addModalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    columnGap: 12,
+    padding: 12
   }
 });

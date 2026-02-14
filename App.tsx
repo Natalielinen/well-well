@@ -2,77 +2,55 @@ import { useState } from "react";
 import { View, Text, ScrollView, Button, Modal, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Todo from "./components/Todo/Todo";
-import { TodoItem } from "./components/Todo/types/todo";
+import { TodoItem } from "./types/todo";
 import { styles } from "./styles"
 import CustomButton from "./ui/CustomButton/CustomButton";
+import AddTodo from "./components/AddTodo/AddTodo";
 
 const todos: TodoItem[] = [
   {
     id: 1,
-    title: "Помыть посуду",
-    description: "Помыть всю посуду в раковине.",
-    extraInfo: "extraInfo",
+    title: "Полить цветы (все) и рыхлить",
+    description: "",
+    lastUpdated: "2026-02-07",
+    isRepeat: true,
+    repeatFrequency: 7,
+    nextDate: "2026-02-14",
+    size: 1,
+    isExpired: false
   },
   {
     id: 2,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
+    title: "Убрать у птиц",
+    description: "",
+    lastUpdated: "2026-02-07",
+    isRepeat: true,
+    repeatFrequency: 7,
+    nextDate: "2026-02-14",
+    size: 1,
+    isExpired: false
   },
   {
     id: 3,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 4,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 5,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 6,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 7,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 8,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 9,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
-  {
-    id: 10,
-    title: "title",
-    description: "description",
-    extraInfo: "extraInfo",
-  },
+    title: "Разобрать на стуле и вдоль стены",
+    description: "",
+    lastUpdated: "2026-01-31",
+    isRepeat: true,
+    repeatFrequency: 14,
+    nextDate: "2026-02-14",
+    size: 3,
+    isExpired: false
+  }
+
 ];
 
 export default function App() {
 
   const [exitModalVusible, setExitModalVisible] = useState(false);
   const [showExtraId, setShowExtraId] = useState<number | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const onModalClose = () => setShowAddModal(false);
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -83,7 +61,7 @@ export default function App() {
           style={styles.appHeader}
         >
           {/* TODO: добавить бургер меню */}
-          <CustomButton onClick={() => console.log("click")} text="+" variant="secondary" />
+          <CustomButton onClick={() => setShowAddModal(true)} text="+" variant="secondary" />
         </View>
         <View style={styles.date}>
           <CustomButton onClick={() => console.log("left")} text="<" variant="ghost" />
@@ -97,7 +75,7 @@ export default function App() {
             return <Todo setShowExtraId={setShowExtraId} showExtraId={showExtraId} todo={item} />
           }}
           ListEmptyComponent={<Text style={styles.emptyListText}>В списке нет дел</Text>}// TODO: добавить кастомный компонент
-          ListFooterComponent={<Pressable style={styles.backToTopButton}><Text style={styles.backToTopButtonText}>К началу списка ↑</Text></Pressable>}
+          ListFooterComponent={todos.length > 10 ? <Pressable style={styles.backToTopButton}><Text style={styles.backToTopButtonText}>К началу списка ↑</Text></Pressable> : null}
         />
 
         <Modal visible={exitModalVusible} onRequestClose={() => setExitModalVisible(false)} animationType="fade">
@@ -108,6 +86,8 @@ export default function App() {
             <Button title="close" onPress={() => setExitModalVisible(false)} />
           </View>
         </Modal>
+
+        <AddTodo showModal={showAddModal} closeModal={onModalClose} />
       </View>
     </SafeAreaView>
   );
