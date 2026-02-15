@@ -4,10 +4,10 @@ export type TodoItem = {
     id: number;
     title: string;
     description: string;
-    lastUpdated: string; // Дата последнего выполнения
+    lastUpdated: string; // Дата последнего выполнения, при создании новой задачи - пустая строка
     isRepeat: boolean;
     repeatFrequency: number; // В днях
-    nextDate: string; // Дата следующего выполнения Или дата начала, если нет даты последнего выполнения (новая задача)
+    nextDate: string; // Дата следующего выполнения Или дата начала, если нет даты последнего выполнения (новая задача), при создании новой задачи - текущая дата
     size: Size;
     isExpired: boolean;
     

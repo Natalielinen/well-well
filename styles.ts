@@ -121,10 +121,28 @@ export const styles = StyleSheet.create({
 		borderWidth: 1,
     borderRadius: 8,
   },
+  multiline: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    margin: 12,
+    columnGap: 12
+  },
+  switchLabel: {
+    fontSize: 16
+
+  },
   addModalButtons: {
     flexDirection: "row",
     justifyContent: "flex-end",
     columnGap: 12,
     padding: 12
+  },
+  error: {
+    color: "red",
+    marginLeft: 12,
   }
 });
