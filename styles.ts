@@ -133,7 +133,10 @@ export const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16
-
+  },
+  pickerLabel: {
+    fontSize: 16,
+    marginLeft: 12
   },
   addModalButtons: {
     flexDirection: "row",

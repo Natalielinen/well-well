@@ -1,8 +1,10 @@
 import { Modal, View, Text, TextInput, Switch } from "react-native";
+import { Picker } from '@react-native-picker/picker';
 import { styles } from "../../styles";
 import { useState } from "react";
 import CustomButton from "../../ui/CustomButton/CustomButton";
 import { colors } from "../../themes/colors";
+import { sizeOptions } from "../../constants/todo";
 
 type AddTodoProps = {
     showModal: boolean;
@@ -13,6 +15,8 @@ export default function AddTodo({ showModal, closeModal }: AddTodoProps) {
     const [description, setDescription] = useState("");
     const [isRepeat, setIsRepeat] = useState(false);
     const [repeatFrequency, setRepeatFrequency] = useState("");
+
+    const [size, setSize] = useState(sizeOptions[0].value);
 
     const [error, setError] = useState({
         title: "",
@@ -68,11 +72,11 @@ export default function AddTodo({ showModal, closeModal }: AddTodoProps) {
             id: Date.now(),
             title,
             description,
-            lastUpdated: new Date().toLocaleDateString(),
+            lastUpdated: "",
             isRepeat,
             repeatFrequency,
             nextDate: new Date().toLocaleDateString(),
-            size: 1, // заменить
+            size,
             isExpired: false
         }
 
@@ -142,6 +146,16 @@ export default function AddTodo({ showModal, closeModal }: AddTodoProps) {
                 {
                     isRepeat && error.repeatFrequency && <Text style={styles.error}>{error.repeatFrequency}</Text>
                 }
+
+                <Text style={styles.pickerLabel}>Размер дела? (как долго делать?)</Text>
+                <Picker
+                    selectedValue={size}
+                    onValueChange={(itemValue) => setSize(itemValue)}
+                >
+                    {sizeOptions.map((option) => (
+                        <Picker.Item key={option.value} label={option.label} value={option.value} />
+                    ))}
+                </Picker>
 
 
                 <View style={styles.addModalButtons}>

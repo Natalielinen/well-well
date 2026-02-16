@@ -13,7 +13,9 @@ export type TodoItem = {
     
 }
 
-export type SizeItem = Record<number, { time: string, color: string, lineWidth: number }>
+export type SizeItem = Record<number, { time: string, color: string, lineWidth: number }>;
+
+export type SizeOption = { value: Size, label: string }
 
 /*
 

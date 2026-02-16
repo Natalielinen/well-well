@@ -1,4 +1,4 @@
-import { SizeItem } from "../types/todo";
+import { SizeItem, SizeOption } from "../types/todo";
 
 export const sizes: SizeItem = {
     1: {
@@ -26,4 +26,12 @@ export const sizes: SizeItem = {
         color: "#5f0101",
         lineWidth: 140
     }
-}
+};
+
+export const sizeOptions: SizeOption[] = [
+    { label: "15 - 30 мин", value: 1 },
+    { label: "30 - 60 мин", value: 3 },
+    { label: "1 ч - 2 ч", value: 5 },
+    { label: "2 ч - 3 ч", value: 8 },
+    { label: "больше 3 ч", value: 13 },
+]
