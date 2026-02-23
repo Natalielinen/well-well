@@ -7,17 +7,16 @@ const windowHeight = Dimensions.get("window").height;
 export const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.background,
   },
   appContainer: {
     flex: 1,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.background,
   },
   appHeader: {
     width: "100%",
     height: "6%",
-    backgroundColor: colors.background,
-    //marginTop: 50,
+    backgroundColor: colors.primary,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
