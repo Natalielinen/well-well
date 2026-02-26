@@ -1,10 +1,11 @@
 import { Pressable, View, Text } from "react-native";
 import { styles } from "../../styles";
 import { ButtonVariant } from "../../types/ui";
+import { ReactNode } from "react";
 
 type CustomButtonProps = {
     onClick: () => void;
-    text: string;
+    text: string | ReactNode;
     variant?: ButtonVariant;
 };
 export default function CustomButton({

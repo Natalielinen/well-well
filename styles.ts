@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
     height: "6%",
     backgroundColor: colors.primary,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
   },
@@ -28,7 +28,12 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: "1%"
+    marginTop: "1%",
+  },
+  pickerItem: {
+    fontSize: windowWidth > 500 ? 32 : 16,
+    fontWeight: "600",
+    color: colors.textPrimary,
   },
   dateText: {
     fontSize: windowWidth > 500 ? 32 : 16,
@@ -74,21 +79,25 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
     paddingHorizontal: 12,
-    paddingVertical: 6
+    paddingVertical: 6,
   },
   primary: {
     backgroundColor: colors.primary,
   },
   secondary: {
     backgroundColor: colors.background,
-    
+  },
+  outlinePrimary: {
+    backgroundColor: colors.background,
+    borderWidth: 3,
+    borderColor: colors.primaryDark,
   },
   ghost: {
     backgroundColor: "transparent",
     boxShadow: "none",
   },
   customButtonText: {
-    fontSize: windowWidth > 500 ? 36 :18,
+    fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "bold",
     color: colors.textPrimary,
   },
@@ -111,13 +120,13 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.textPrimary,
     alignSelf: "center",
-    padding: 12
+    padding: 12,
   },
   input: {
     height: 40,
-		margin: 12,
-		padding: 10,
-		borderWidth: 1,
+    margin: 12,
+    padding: 10,
+    borderWidth: 1,
     borderRadius: 8,
   },
   multiline: {
@@ -128,23 +137,23 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     margin: 12,
-    columnGap: 12
+    columnGap: 12,
   },
   switchLabel: {
-    fontSize: 16
+    fontSize: 16,
   },
   pickerLabel: {
     fontSize: 16,
-    marginLeft: 12
+    marginLeft: 12,
   },
   addModalButtons: {
     flexDirection: "row",
     justifyContent: "flex-end",
     columnGap: 12,
-    padding: 12
+    padding: 12,
   },
   error: {
     color: "red",
     marginLeft: 12,
-  }
+  },
 });

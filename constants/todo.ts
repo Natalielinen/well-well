@@ -34,4 +34,6 @@ export const sizeOptions: SizeOption[] = [
     { label: "1 ч - 2 ч", value: 5 },
     { label: "2 ч - 3 ч", value: 8 },
     { label: "больше 3 ч", value: 13 },
-]
+];
+
+export const filterOptions = [{ label: "Все", value: "all" }, { label: "Сегодня", value: "today" },];
