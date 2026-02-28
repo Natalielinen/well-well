@@ -7,7 +7,6 @@ import { styles } from "./styles";
 import CustomButton from "./ui/CustomButton/CustomButton";
 import AddTodo from "./components/AddTodo/AddTodo";
 import { addDays, format, isSameDay, parse, subDays } from "date-fns";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const todos: TodoItem[] = [
   {
@@ -93,6 +92,7 @@ export default function App() {
 
   useEffect(() => {
     setData(todayData);
+    setShowAll(false);
   }, []);
 
   const onModalClose = () => setShowAddModal(false);
@@ -127,9 +127,7 @@ export default function App() {
         <View style={styles.appHeader}>
           <CustomButton
             onClick={onFilterChange}
-            text={
-              <MaterialCommunityIcons name="filter" size={24} color="black" />
-            }
+            text={!showAll ? "Показать все" : " За сегодня"}
             variant={showAll ? "outlinePrimary" : "primary"}
           />
           <CustomButton
@@ -144,7 +142,7 @@ export default function App() {
             text="<"
             variant="ghost"
           />
-          <Text style={styles.dateText}> Сегодня: {today} </Text>
+          <Text style={styles.dateText}> {today} </Text>
           <CustomButton
             onClick={() => onDateChange("next")}
             text=">"
