@@ -15,7 +15,7 @@ export const styles = StyleSheet.create({
   },
   appHeader: {
     width: "100%",
-    height: "6%",
+    height: "7%",
     backgroundColor: colors.primary,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
   todoItem: {
     padding: 12,
     width: "95%",
-    height: 80,
+    height: 100,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
@@ -64,6 +64,16 @@ export const styles = StyleSheet.create({
   },
   todoDescription: {
     marginTop: 4,
+    fontSize: windowWidth > 500 ? 26 : 13,
+    color: colors.textSecondary,
+  },
+  todoFooter: {
+    marginTop: 12,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  todoFooterText: {
     fontSize: windowWidth > 500 ? 26 : 13,
     color: colors.textSecondary,
   },
