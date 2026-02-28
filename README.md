@@ -12,5 +12,5 @@
 В этом проекте используютя: 
 * React Native
 * CSS
-* JavaScript
+* TypeScript
 * expo
