@@ -7,91 +7,36 @@ import { styles } from "./styles";
 import CustomButton from "./ui/CustomButton/CustomButton";
 import AddTodo from "./components/AddTodo/AddTodo";
 import { addDays, format, isSameDay, parse, subDays } from "date-fns";
-
-const todos: TodoItem[] = [
-  {
-    id: 1,
-    title: "Полить цветы (все) и рыхлить",
-    description: "",
-    lastUpdated: "2026-02-07",
-    isRepeat: true,
-    repeatFrequency: 7,
-    nextDate: "2026-02-24",
-    size: 1,
-    isExpired: false,
-  },
-  {
-    id: 2,
-    title: "Убрать у птиц",
-    description: "",
-    lastUpdated: "2026-02-07",
-    isRepeat: true,
-    repeatFrequency: 7,
-    nextDate: "2026-02-24",
-    size: 1,
-    isExpired: false,
-  },
-  {
-    id: 3,
-    title: "Разобрать на стуле и вдоль стены",
-    description: "",
-    lastUpdated: "2026-01-31",
-    isRepeat: true,
-    repeatFrequency: 14,
-    nextDate: "2026-02-23",
-    size: 3,
-    isExpired: false,
-  },
-  {
-    id: 5,
-    title: "test 2",
-    description: "",
-    lastUpdated: "2026-01-31",
-    isRepeat: true,
-    repeatFrequency: 14,
-    nextDate: "2026-02-23",
-    size: 5,
-    isExpired: false,
-  },
-  {
-    id: 4,
-    title: "test",
-    description: "",
-    lastUpdated: "2026-01-31",
-    isRepeat: true,
-    repeatFrequency: 14,
-    nextDate: "2026-02-25",
-    size: 8,
-    isExpired: true,
-  },
-  {
-    id: 6,
-    title: "test 3",
-    description: "",
-    lastUpdated: "2026-01-31",
-    isRepeat: true,
-    repeatFrequency: 14,
-    nextDate: "2026-02-25",
-    size: 13,
-    isExpired: false,
-  },
-];
+import { addTodo, loadTodos, removeTodo } from "./storage/todoStorage";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
   const [showExtraId, setShowExtraId] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  const [data, setData] = useState<TodoItem[]>([]);
+  //  const [data, setData] = useState<TodoItem[]>([]);
   const [showAll, setShowAll] = useState(false);
 
-  const todayData = todos.filter((todo) => {
-    const todoDate = parse(todo.nextDate, "yyyy-MM-dd", new Date());
-    return isSameDay(todoDate, new Date());
-  });
+  const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
+  const [filteredTodos, setFilteredTodos] = useState<TodoItem[]>([]);
 
+  const filterTodosByDate = (todos: TodoItem[]) => {
+    return todos.filter((todo) => {
+      const todoDate = parse(todo.nextDate, "yyyy-MM-dd", new Date());
+      return isSameDay(todoDate, new Date());
+    })
+  }
+
+  // Загружаем все задачи из хранилища при старте
   useEffect(() => {
-    setData(todayData);
+    const init = async () => {
+      const storedTodos = await loadTodos();
+      setAllTodos(storedTodos);
+      // фильтруем по сегодняшней дате
+      setFilteredTodos(filterTodosByDate(storedTodos));
+    };
+
+    init();
     setShowAll(false);
   }, []);
 
@@ -103,8 +48,8 @@ export default function App() {
       const parsedDate = parse(prev, "dd.MM.yyyy", new Date());
       const newDate =
         type === "prev" ? subDays(parsedDate, 1) : addDays(parsedDate, 1);
-      setData(
-        todos.filter((todo) =>
+      setFilteredTodos(
+        allTodos.filter((todo) =>
           isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), newDate),
         ),
       );
@@ -112,12 +57,22 @@ export default function App() {
     });
   };
 
+  const onAddTodo = (newTask: TodoItem) => {
+    addTodo(newTask);
+    const updatedTodos = [newTask, ...allTodos];
+    setAllTodos(updatedTodos);
+
+    // фильтруем по сегодняшней дате
+    setFilteredTodos(filterTodosByDate(updatedTodos));
+  };
+
+
   const onFilterChange = () => {
     setShowAll(!showAll);
     if (showAll) {
-      setData(todayData);
+      setFilteredTodos(allTodos);
     } else {
-      setData(todos);
+      setFilteredTodos(filteredTodos); // ??
     }
   };
 
@@ -152,7 +107,7 @@ export default function App() {
 
         <FlatList
           contentContainerStyle={styles.appScrollableContainer}
-          data={data}
+          data={filteredTodos}
           renderItem={({ item }) => {
             return (
               <Todo
@@ -166,7 +121,7 @@ export default function App() {
             <Text style={styles.emptyListText}>На сегодня задач нет</Text>
           } // TODO: добавить кастомный компонент
           ListFooterComponent={
-            data.length > 10 ? (
+            filteredTodos.length > 10 ? (
               <Pressable style={styles.backToTopButton}>
                 <Text style={styles.backToTopButtonText}>
                   К началу списка ↑
@@ -189,7 +144,7 @@ export default function App() {
           </View>
         </Modal>
 
-        <AddTodo showModal={showAddModal} closeModal={onModalClose} />
+        <AddTodo showModal={showAddModal} closeModal={onModalClose} onAddTodo={onAddTodo} />
       </View>
     </SafeAreaView>
   );

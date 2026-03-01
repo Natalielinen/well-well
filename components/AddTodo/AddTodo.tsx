@@ -5,12 +5,15 @@ import { useState } from "react";
 import CustomButton from "../../ui/CustomButton/CustomButton";
 import { colors } from "../../themes/colors";
 import { sizeOptions } from "../../constants/todo";
+import { TodoItem } from "../../types/todo";
+import { format } from "date-fns";
 
 type AddTodoProps = {
     showModal: boolean;
     closeModal: () => void;
+    onAddTodo: (todo: TodoItem) => void;
 };
-export default function AddTodo({ showModal, closeModal }: AddTodoProps) {
+export default function AddTodo({ showModal, closeModal, onAddTodo }: AddTodoProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [isRepeat, setIsRepeat] = useState(false);
@@ -68,19 +71,19 @@ export default function AddTodo({ showModal, closeModal }: AddTodoProps) {
             });
             return;
         }
-        const newTask = {
+        const newTask: TodoItem = {
             id: Date.now(),
             title,
             description,
-            lastUpdated: "",
+            lastUpdated: new Date().toLocaleDateString(),
             isRepeat,
-            repeatFrequency,
-            nextDate: new Date().toLocaleDateString(),
+            repeatFrequency: Number(repeatFrequency),
+            nextDate: format(new Date(), "yyyy-MM-dd"),
             size,
             isExpired: false
         }
 
-        console.log(newTask);
+        onAddTodo(newTask);
         clearFields();
         closeModal();
     }
