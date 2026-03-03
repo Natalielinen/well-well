@@ -151,10 +151,27 @@ export const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16,
+    fontWeight: "600",
   },
   pickerLabel: {
     fontSize: 16,
     marginLeft: 12,
+    fontWeight: "600",
+  },
+  datePickerContainer: {
+    gap: 4,
+
+  },
+  datePicker: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    margin: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+
   },
   addModalButtons: {
     flexDirection: "row",

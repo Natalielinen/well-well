@@ -1,4 +1,4 @@
-import { Modal, View, Text, TextInput, Switch, Platform } from "react-native";
+import { Modal, View, Text, TextInput, Switch, Platform, Pressable } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { styles } from "../../styles";
 import { useState } from "react";
@@ -6,9 +6,10 @@ import CustomButton from "../../ui/CustomButton/CustomButton";
 import { colors } from "../../themes/colors";
 import { sizeOptions } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ru } from 'date-fns/locale';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 
 type AddTodoProps = {
     showModal: boolean;
@@ -175,12 +176,13 @@ export default function AddTodo({
                     ))}
                 </Picker>
 
-                <View>
-                    <Text>{format(nextDate, "d LLL yyyy", { locale: ru })}</Text>
-                    <CustomButton
-                        text="Выбрать дату начала"
-                        onClick={() => setShowDatepicker(true)}
-                    />
+                <View style={styles.datePickerContainer}>
+                    <Text style={styles.pickerLabel}>Дата выполнения</Text>
+                    <Pressable style={styles.datePicker} onPress={() => setShowDatepicker(true)}>
+                        <Text>{format(nextDate, "d LLL yyyy", { locale: ru })}</Text>
+                        <EvilIcons name="calendar" size={24} color="black" />
+                    </Pressable>
+
                     {showDatepicker && (
                         <DateTimePicker
                             value={nextDate}
