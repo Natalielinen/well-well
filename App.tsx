@@ -6,15 +6,14 @@ import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import CustomButton from "./ui/CustomButton/CustomButton";
 import AddTodo from "./components/AddTodo/AddTodo";
-import { addDays, format, isSameDay, parse, subDays } from "date-fns";
-import { addTodo, loadTodos, removeTodo } from "./storage/todoStorage";
+import { addDays, format, isSameDay, parse, setDate, subDays } from "date-fns";
+import { addTodo, loadTodos, removeTodo } from "./storage/todoStorage";;
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
   const [showExtraId, setShowExtraId] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  //  const [data, setData] = useState<TodoItem[]>([]);
   const [showAll, setShowAll] = useState(false);
 
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
@@ -27,16 +26,23 @@ export default function App() {
     })
   }
 
-  // Загружаем все задачи из хранилища при старте
-  useEffect(() => {
-    const init = async () => {
-      const storedTodos = await loadTodos();
-      setAllTodos(storedTodos);
+  const getAllTodos = async (filtered = false) => {
+    const storedTodos = await loadTodos();
+    setAllTodos(storedTodos);
+    if (filtered) {
       // фильтруем по сегодняшней дате
       setFilteredTodos(filterTodosByDate(storedTodos));
-    };
+    } else {
+      setFilteredTodos(storedTodos);
+    }
+  };
 
-    init();
+  // Загружаем все задачи из хранилища при старте
+  useEffect(() => {
+
+    setToday(format(new Date(), "dd.MM.yyyy"));
+
+    getAllTodos(true);
     setShowAll(false);
   }, []);
 
@@ -69,10 +75,12 @@ export default function App() {
 
   const onFilterChange = () => {
     setShowAll(!showAll);
+    setToday(format(new Date(), "dd.MM.yyyy"));
     if (showAll) {
-      setFilteredTodos(allTodos);
+      getAllTodos(true);
     } else {
-      setFilteredTodos(filteredTodos); // ??
+      getAllTodos();
+
     }
   };
 
