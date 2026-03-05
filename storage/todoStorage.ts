@@ -36,71 +36,11 @@ export const removeTodo = async (id: number) => {
   await saveTodos(updated);
   return updated;
 };
-// const todos: TodoItem[] = [
-//   {
-//     id: 1,
-//     title: "Полить цветы (все) и рыхлить",
-//     description: "",
-//     lastUpdated: "2026-02-07",
-//     isRepeat: true,
-//     repeatFrequency: 7,
-//     nextDate: "2026-02-24",
-//     size: 1,
-//     isExpired: false,
-//   },
-//   {
-//     id: 2,
-//     title: "Убрать у птиц",
-//     description: "",
-//     lastUpdated: "2026-02-07",
-//     isRepeat: true,
-//     repeatFrequency: 7,
-//     nextDate: "2026-02-24",
-//     size: 1,
-//     isExpired: false,
-//   },
-//   {
-//     id: 3,
-//     title: "Разобрать на стуле и вдоль стены",
-//     description: "",
-//     lastUpdated: "2026-01-31",
-//     isRepeat: true,
-//     repeatFrequency: 14,
-//     nextDate: "2026-02-23",
-//     size: 3,
-//     isExpired: false,
-//   },
-//   {
-//     id: 5,
-//     title: "test 2",
-//     description: "",
-//     lastUpdated: "2026-01-31",
-//     isRepeat: true,
-//     repeatFrequency: 14,
-//     nextDate: "2026-02-23",
-//     size: 5,
-//     isExpired: false,
-//   },
-//   {
-//     id: 4,
-//     title: "test",
-//     description: "",
-//     lastUpdated: "2026-01-31",
-//     isRepeat: true,
-//     repeatFrequency: 14,
-//     nextDate: "2026-02-25",
-//     size: 8,
-//     isExpired: true,
-//   },
-//   {
-//     id: 6,
-//     title: "test 3",
-//     description: "",
-//     lastUpdated: "2026-01-31",
-//     isRepeat: true,
-//     repeatFrequency: 14,
-//     nextDate: "2026-02-25",
-//     size: 13,
-//     isExpired: false,
-//   },
-// ];
+
+// Обновление задачи по id
+export const updateTodo = async (id: number, todo: TodoItem) => {
+  const todos = await loadTodos();
+  const updated = todos.map(t => t.id === id ? todo : t);
+  await saveTodos(updated);
+  return updated;
+};
