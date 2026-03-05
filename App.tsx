@@ -20,10 +20,13 @@ export default function App() {
   const [filteredTodos, setFilteredTodos] = useState<TodoItem[]>([]);
 
   const filterTodosByDate = (todos: TodoItem[]) => {
-    return todos.filter((todo) => {
+    const expiredTodos = todos.filter((todo) => todo.isExpired);
+    const todaysTodos = todos.filter((todo) => {
       const todoDate = parse(todo.nextDate, "yyyy-MM-dd", new Date());
       return isSameDay(todoDate, new Date());
-    })
+    });
+
+    return [...expiredTodos, ...todaysTodos];
   }
 
   const getAllTodos = async (filtered = false) => {
