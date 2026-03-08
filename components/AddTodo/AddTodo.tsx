@@ -95,7 +95,6 @@ export default function AddTodo({
             repeatFrequency: Number(repeatFrequency),
             nextDate: format(nextDate, "yyyy-MM-dd"),
             size,
-            isExpired: false,
         };
 
         onAddTodo(newTask);

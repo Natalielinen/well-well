@@ -37,6 +37,7 @@ export const removeTodo = async (id: number) => {
   return updated;
 };
 
+
 // Обновление задачи по id
 export const updateTodo = async (id: number, todo: TodoItem) => {
   const todos = await loadTodos();

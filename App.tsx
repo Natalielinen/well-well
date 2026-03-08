@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { View, Text, Button, Modal, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
@@ -6,85 +6,88 @@ import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import CustomButton from "./ui/CustomButton/CustomButton";
 import AddTodo from "./components/AddTodo/AddTodo";
-import { addDays, format, isSameDay, parse, setDate, subDays } from "date-fns";
-import { addTodo, loadTodos, removeTodo } from "./storage/todoStorage";;
+import {
+  addDays,
+  format,
+  isBefore,
+  isSameDay,
+  parse,
+  startOfDay,
+  subDays,
+} from "date-fns";
+import { addTodo, loadTodos } from "./storage/todoStorage";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
   const [showExtraId, setShowExtraId] = useState<number | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  const [showAll, setShowAll] = useState(false);
 
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
-  const [filteredTodos, setFilteredTodos] = useState<TodoItem[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAll, setShowAll] = useState(false);
 
-  const filterTodosByDate = (todos: TodoItem[]) => {
-    const expiredTodos = todos.filter((todo) => todo.isExpired);
-    const todaysTodos = todos.filter((todo) => {
-      const todoDate = parse(todo.nextDate, "yyyy-MM-dd", new Date());
-      return isSameDay(todoDate, new Date());
-    });
+  const isExpired = (todo: TodoItem) =>
+    isBefore(
+      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
+      startOfDay(new Date()),
+    );
 
-    return [...expiredTodos, ...todaysTodos];
-  }
+  const isToday = (todo: TodoItem) =>
+    isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
 
-  const getAllTodos = async (filtered = false) => {
-    const storedTodos = await loadTodos();
-    setAllTodos(storedTodos);
-    if (filtered) {
-      // фильтруем по сегодняшней дате
-      setFilteredTodos(filterTodosByDate(storedTodos));
-    } else {
-      setFilteredTodos(storedTodos);
+  const sortByDate = (todos: TodoItem[]) =>
+    [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
+
+  const displayedTodos = useMemo(() => {
+    if (showAll) {
+      const expired = sortByDate(allTodos.filter(isExpired));
+      const rest = sortByDate(allTodos.filter((todo) => !isExpired(todo)));
+
+      return [...expired, ...rest];
     }
+
+    const expired = sortByDate(allTodos.filter(isExpired));
+    const today = sortByDate(allTodos.filter(isToday));
+
+    return [...expired, ...today];
+  }, [allTodos, selectedDate, showAll]);
+
+  const getAllTodos = async () => {
+    const storedTodos = await loadTodos();
+
+    setAllTodos(storedTodos);
   };
 
   // Загружаем все задачи из хранилища при старте
   useEffect(() => {
-
     setToday(format(new Date(), "dd.MM.yyyy"));
 
-    getAllTodos(true);
+    getAllTodos();
     setShowAll(false);
   }, []);
+
+  useEffect(() => {
+    setToday(format(selectedDate, "dd.MM.yyyy"));
+  }, [selectedDate]);
 
   const onModalClose = () => setShowAddModal(false);
 
   const onDateChange = (type: "prev" | "next") => {
-    setShowAll(false);
-    setToday((prev) => {
-      const parsedDate = parse(prev, "dd.MM.yyyy", new Date());
-      const newDate =
-        type === "prev" ? subDays(parsedDate, 1) : addDays(parsedDate, 1);
-      setFilteredTodos(
-        allTodos.filter((todo) =>
-          isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), newDate),
-        ),
-      );
-      return format(newDate, "dd.MM.yyyy");
-    });
+    setSelectedDate((prev) =>
+      type === "prev" ? subDays(prev, 1) : addDays(prev, 1),
+    );
   };
 
-  const onAddTodo = (newTask: TodoItem) => {
-    addTodo(newTask);
-    const updatedTodos = [newTask, ...allTodos];
-    setAllTodos(updatedTodos);
+  const onAddTodo = async (newTask: TodoItem) => {
+    await addTodo(newTask);
 
-    // фильтруем по сегодняшней дате
-    setFilteredTodos(filterTodosByDate(updatedTodos));
+    setAllTodos((prev) => [newTask, ...prev]);
   };
-
 
   const onFilterChange = () => {
-    setShowAll(!showAll);
-    setToday(format(new Date(), "dd.MM.yyyy"));
-    if (showAll) {
-      getAllTodos(true);
-    } else {
-      getAllTodos();
-
-    }
+    setShowAll((prev) => !prev);
+    setSelectedDate(new Date());
   };
 
   return (
@@ -107,6 +110,10 @@ export default function App() {
             onClick={() => onDateChange("prev")}
             text="<"
             variant="ghost"
+            disabled={isBefore(
+              parse(today, "dd.MM.yyyy", new Date()),
+              new Date(),
+            )}
           />
           <Text style={styles.dateText}> {today} </Text>
           <CustomButton
@@ -118,21 +125,21 @@ export default function App() {
 
         <FlatList
           contentContainerStyle={styles.appScrollableContainer}
-          data={filteredTodos}
-          renderItem={({ item }) => {
-            return (
-              <Todo
-                setShowExtraId={setShowExtraId}
-                showExtraId={showExtraId}
-                todo={item}
-              />
-            );
-          }}
+          data={displayedTodos}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <Todo
+              todo={item}
+              isTodoExpired={isExpired(item)}
+              setShowExtraId={setShowExtraId}
+              showExtraId={showExtraId}
+            />
+          )}
           ListEmptyComponent={
             <Text style={styles.emptyListText}>На сегодня задач нет</Text>
           } // TODO: добавить кастомный компонент
           ListFooterComponent={
-            filteredTodos.length > 10 ? (
+            displayedTodos.length > 10 ? (
               <Pressable style={styles.backToTopButton}>
                 <Text style={styles.backToTopButtonText}>
                   К началу списка ↑
@@ -155,7 +162,11 @@ export default function App() {
           </View>
         </Modal>
 
-        <AddTodo showModal={showAddModal} closeModal={onModalClose} onAddTodo={onAddTodo} />
+        <AddTodo
+          showModal={showAddModal}
+          closeModal={onModalClose}
+          onAddTodo={onAddTodo}
+        />
       </View>
     </SafeAreaView>
   );

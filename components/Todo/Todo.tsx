@@ -8,10 +8,11 @@ import { ru } from 'date-fns/locale';
 type TodoProps = {
     todo: TodoItem;
     showExtraId: number | null;
-    setShowExtraId: (id: number | null) => void
+    setShowExtraId: (id: number | null) => void;
+    isTodoExpired: boolean;
 };
 // TODO: добавить чекбокс для отметки сделанных дел
-export default function Todo({ todo, showExtraId, setShowExtraId }: TodoProps) {
+export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired }: TodoProps) {
 
     const onPress = () => {
         setShowExtraId(showExtraId === todo.id ? null : todo.id);
@@ -23,7 +24,7 @@ export default function Todo({ todo, showExtraId, setShowExtraId }: TodoProps) {
         <Pressable
             onPress={onPress}
             key={todo.id}
-            style={[styles.todoItem, todo.isExpired ? styles.expiredItem : {}]}>
+            style={[styles.todoItem, isTodoExpired ? styles.expiredItem : {}]}>
 
             <View
                 key={todo.id}
