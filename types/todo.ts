@@ -9,7 +9,6 @@ export type TodoItem = {
     repeatFrequency: number; // В днях
     nextDate: string; // Дата следующего выполнения Или дата начала, если нет даты последнего выполнения (новая задача), при создании новой задачи - текущая дата
     size: Size;
-    isExpired: boolean;
     
 }
 
