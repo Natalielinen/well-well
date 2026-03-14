@@ -48,14 +48,14 @@ export const styles = StyleSheet.create({
   todoItem: {
     padding: 12,
     width: "95%",
-    height: 100,
+    height: 110,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
     alignSelf: "center",
   },
   expiredItem: {
-    backgroundColor: "#d65f5f7c",
+    backgroundColor: "#e7a0a0",
   },
   todoTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
@@ -70,12 +70,29 @@ export const styles = StyleSheet.create({
   todoFooter: {
     marginTop: 12,
     flexDirection: "row",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     alignItems: "center",
+   paddingBottom: 6
   },
   todoFooterText: {
     fontSize: windowWidth > 500 ? 26 : 13,
     color: colors.textSecondary,
+  },
+  todoActions: {
+    paddingTop: 24,
+    paddingHorizontal: 12,
+    marginTop: -12,
+    zIndex: -1,
+    width: "90%",
+    height: 70,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    borderRadius: 8,
+    boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
+    alignSelf: "center",
+    columnGap: 12
+    
+
   },
   emptyListText: {
     fontSize: windowWidth > 500 ? 36 : 18,
@@ -88,8 +105,37 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
+  },
+  lg: {
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    
+  },
+  textlg: {
+    fontSize: windowWidth > 500 ? 34 : 16,
+  },
+  md: {
     paddingHorizontal: 12,
     paddingVertical: 6,
+  },
+  textmd: {
+    fontSize: windowWidth > 500 ? 32 : 14,
+  },
+   sm: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+   
+  },
+  textsm: {
+    fontSize: windowWidth > 500 ? 30 : 12,
+  },
+     xs: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    
+  },
+  textxs: {
+    fontSize: windowWidth > 500 ? 28 : 10,
   },
   disabled: {
     opacity: 0.5,
@@ -109,6 +155,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "transparent",
     boxShadow: "none",
   },
+
   customButtonText: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "bold",

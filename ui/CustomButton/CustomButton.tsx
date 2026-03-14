@@ -8,17 +8,19 @@ type CustomButtonProps = {
     text: string | ReactNode;
     variant?: ButtonVariant;
     disabled?: boolean;
+    size?: "xs" | "sm" | "md" | "lg";
 };
 export default function CustomButton({
     onClick,
     text,
     variant = "primary",
     disabled = false,
+    size = "md",
 }: CustomButtonProps) {
     return (
         <Pressable onPress={onClick} disabled={disabled}>
-            <View style={[styles.customButton, styles[variant], disabled && styles.disabled]}>
-                <Text style={styles.customButtonText}>{text}</Text>
+            <View style={[styles.customButton, styles[variant], styles[size], disabled && styles.disabled]}>
+                <Text style={[styles.customButtonText, styles[`text${size}`]]}>{text}</Text>
             </View>
         </Pressable>
     );
