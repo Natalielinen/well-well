@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
   todoItem: {
     padding: 12,
     width: "95%",
-    height: 110,
+    minHeight: 110,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
@@ -56,6 +56,12 @@ export const styles = StyleSheet.create({
   },
   expiredItem: {
     backgroundColor: "#e7a0a0",
+  },
+  todoHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    
   },
   todoTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
@@ -91,7 +97,6 @@ export const styles = StyleSheet.create({
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
     alignSelf: "center",
     columnGap: 12
-    
 
   },
   emptyListText: {

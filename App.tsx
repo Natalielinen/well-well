@@ -64,7 +64,6 @@ export default function App() {
     setToday(format(new Date(), "dd.MM.yyyy"));
 
     getAllTodos();
-    setShowExtraId(displayedTodos[0].id);
     setShowAll(false);
   }, []);
 
@@ -134,6 +133,7 @@ export default function App() {
               isTodoExpired={isExpired(item)}
               setShowExtraId={setShowExtraId}
               showExtraId={showExtraId}
+              getAllTodos={getAllTodos}
             />
           )}
           ListEmptyComponent={

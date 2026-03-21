@@ -1,26 +1,49 @@
-import { Pressable, View, Text } from "react-native";
+import { Pressable, View, Text, Alert } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "../../styles";
 import { sizes } from "../../constants/todo";
 import { format } from "date-fns";
 import { ru } from 'date-fns/locale';
 import Octicons from '@expo/vector-icons/Octicons';
+import Feather from '@expo/vector-icons/Feather';
 import CustomButton from "../../ui/CustomButton/CustomButton";
+import { removeTodo } from "../../storage/todoStorage";
 
 type TodoProps = {
     todo: TodoItem;
     showExtraId: number | null;
     setShowExtraId: (id: number | null) => void;
     isTodoExpired: boolean;
+    getAllTodos: () => Promise<void>;
 };
-// TODO: добавить чекбокс для отметки сделанных дел
-export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired }: TodoProps) {
+export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired, getAllTodos }: TodoProps) {
+
+    const showAlert = (title: string, message: string) => {
+        Alert.alert(
+            title,
+            message,
+            [
+                {
+                    text: 'OK',
+                    onPress: getAllTodos,
+                },
+            ],
+        );
+    };
+
 
     const onPress = () => {
         setShowExtraId(showExtraId === todo.id ? null : todo.id);
     }
 
     const formattedDate = format(new Date(todo.nextDate), "d LLL yyyy", { locale: ru });
+
+    const onTaskComplete = async () => {
+        if (!todo.isRepeat) {
+            await removeTodo(todo.id);
+            showAlert("Успешно", "Выполнена не повторяющаяся задача. Задача удалена из списка дел");
+        }
+    }
 
     return (
         <>
@@ -40,9 +63,14 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired 
                         marginBottom: 4
                     }}></View>
                     <View>
-                        <Text style={styles.todoTitle}>
-                            {todo.title}
-                        </Text>
+                        <View style={styles.todoHeader}>
+                            <Text style={styles.todoTitle}>
+                                {todo.title}
+                            </Text>
+                            {todo.isRepeat && <Feather name="repeat" size={18} color="black" />}
+
+                        </View>
+
                         <Text style={styles.todoDescription}>{todo.description}</Text>
                     </View>
 
@@ -57,9 +85,10 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired 
 
             {showExtraId === todo.id && (
                 <View style={styles.todoActions}>
-                    <CustomButton onClick={() => console.log("done")} text="Выполнить" variant="secondary" />
+                    <CustomButton onClick={onTaskComplete} text="Выполнить" variant="secondary" />
                     <CustomButton onClick={() => console.log("delete")} text="Удалить" variant="secondary" />
                     <CustomButton onClick={() => console.log("delete")} text="Редактировать" variant="secondary" />
+
 
                 </View>
             )}
