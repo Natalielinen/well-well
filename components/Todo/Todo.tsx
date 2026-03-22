@@ -2,12 +2,12 @@ import { Pressable, View, Text, Alert } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "../../styles";
 import { sizes } from "../../constants/todo";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import { ru } from 'date-fns/locale';
 import Octicons from '@expo/vector-icons/Octicons';
-import Feather from '@expo/vector-icons/Feather';
 import CustomButton from "../../ui/CustomButton/CustomButton";
-import { removeTodo } from "../../storage/todoStorage";
+import { removeTodo, updateTodo } from "../../storage/todoStorage";
+import { useState } from "react";
 
 type TodoProps = {
     todo: TodoItem;
@@ -18,6 +18,8 @@ type TodoProps = {
 };
 export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired, getAllTodos }: TodoProps) {
 
+    const [showRepeatTooltip, setShowRepeatTooltip] = useState(false);
+
     const showAlert = (title: string, message: string) => {
         Alert.alert(
             title,
@@ -26,6 +28,33 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired,
                 {
                     text: 'OK',
                     onPress: getAllTodos,
+                },
+            ],
+        );
+    };
+
+    const showAlertForExpiredTask = () => {
+        Alert.alert(
+            "Внимание!",
+            "Задача была просрочена, какую дату выполнения вы хотите выбрать?",
+            [
+                {
+                    text: 'Сегодня',
+                    onPress: async () => {
+                        await updateTodo(
+                            todo.id,
+                            { ...todo, lastUpdated: format(new Date(), "yyyy-MM-dd"), nextDate: format(addDays(new Date(), todo.repeatFrequency), "yyyy-MM-dd") });
+                        getAllTodos();
+                    },
+                },
+                {
+                    text: 'Дата в задаче',
+                    onPress: async () => {
+                        await updateTodo(
+                            todo.id,
+                            { ...todo, lastUpdated: format(new Date(), "yyyy-MM-dd"), nextDate: format(addDays(new Date(todo.nextDate), todo.repeatFrequency), "yyyy-MM-dd") });
+                        getAllTodos();
+                    },
                 },
             ],
         );
@@ -42,6 +71,15 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired,
         if (!todo.isRepeat) {
             await removeTodo(todo.id);
             showAlert("Успешно", "Выполнена не повторяющаяся задача. Задача удалена из списка дел");
+        } else if (todo.isRepeat && !isTodoExpired) {
+            const newNextDate = addDays(new Date(todo.nextDate), todo.repeatFrequency);
+            await updateTodo(
+                todo.id,
+                { ...todo, lastUpdated: format(new Date(), "yyyy-MM-dd"), nextDate: format(newNextDate, "yyyy-MM-dd") });
+            showAlert("Успешно", `Выполнена повторяющаяся задача. Дата следующего выполнения: ${format(newNextDate, "d LLL yyyy", { locale: ru })}`);
+
+        } else if (todo.isRepeat && isTodoExpired) {
+            showAlertForExpiredTask();
         }
     }
 
@@ -67,7 +105,7 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired,
                             <Text style={styles.todoTitle}>
                                 {todo.title}
                             </Text>
-                            {todo.isRepeat && <Feather name="repeat" size={18} color="black" />}
+                            {todo.isRepeat && <Text style={styles.todoRepeat}>Каждые {todo.repeatFrequency} дней</Text>}
 
                         </View>
 
@@ -87,7 +125,7 @@ export default function Todo({ todo, showExtraId, setShowExtraId, isTodoExpired,
                 <View style={styles.todoActions}>
                     <CustomButton onClick={onTaskComplete} text="Выполнить" variant="secondary" />
                     <CustomButton onClick={() => console.log("delete")} text="Удалить" variant="secondary" />
-                    <CustomButton onClick={() => console.log("delete")} text="Редактировать" variant="secondary" />
+                    <CustomButton onClick={() => console.log("delete")} text="Изменить" variant="secondary" />
 
 
                 </View>

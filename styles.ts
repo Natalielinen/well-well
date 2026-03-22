@@ -57,6 +57,10 @@ export const styles = StyleSheet.create({
   expiredItem: {
     backgroundColor: "#e7a0a0",
   },
+  todoRepeat: {
+    color: colors.textSecondary,
+    fontSize: windowWidth > 500 ? 26 : 13,
+  },
   todoHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -93,6 +97,7 @@ export const styles = StyleSheet.create({
     height: 70,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
+    justifyContent: "space-between",
     borderRadius: 8,
     boxShadow: "0px 2px 2px rgba(0, 0, 0, 0.25)",
     alignSelf: "center",
