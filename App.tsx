@@ -133,6 +133,7 @@ export default function App() {
               isTodoExpired={isExpired(item)}
               setShowExtraId={setShowExtraId}
               showExtraId={showExtraId}
+              getAllTodos={getAllTodos}
             />
           )}
           ListEmptyComponent={
