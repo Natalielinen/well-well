@@ -15,7 +15,8 @@ import {
   startOfDay,
   subDays,
 } from "date-fns";
-import { addTodo, loadTodos } from "./storage/todoStorage";
+import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -26,6 +27,8 @@ export default function App() {
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAll, setShowAll] = useState(false);
+
+  const [editData, setEditData] = useState<TodoItem | null>(null);
 
   const isExpired = (todo: TodoItem) =>
     isBefore(
@@ -85,10 +88,21 @@ export default function App() {
     setAllTodos((prev) => [newTask, ...prev]);
   };
 
+  const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
+    await updateTodo(id, updatedTodo);
+
+    getAllTodos();
+  }
+
   const onFilterChange = () => {
     setShowAll((prev) => !prev);
     setSelectedDate(new Date());
   };
+
+  const openEditModal = (editData: TodoItem) => {
+    setEditData(editData);
+    setShowAddModal(true);
+  }
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -134,6 +148,7 @@ export default function App() {
               setShowExtraId={setShowExtraId}
               showExtraId={showExtraId}
               getAllTodos={getAllTodos}
+              openEditModal={() => openEditModal(item)}
             />
           )}
           ListEmptyComponent={
@@ -167,6 +182,9 @@ export default function App() {
           showModal={showAddModal}
           closeModal={onModalClose}
           onAddTodo={onAddTodo}
+          onUpdateTodo={onUpdateTodo}
+          editData={editData}
+          setEditData={setEditData}
         />
       </View>
     </SafeAreaView>

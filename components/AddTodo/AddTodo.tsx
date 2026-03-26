@@ -1,25 +1,42 @@
-import { Modal, View, Text, TextInput, Switch, Platform, Pressable, KeyboardAvoidingView, ScrollView } from "react-native";
+import {
+    Modal,
+    View,
+    Text,
+    TextInput,
+    Switch,
+    Platform,
+    Pressable,
+    KeyboardAvoidingView,
+    ScrollView,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { styles } from "../../styles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomButton from "../../ui/CustomButton/CustomButton";
 import { colors } from "../../themes/colors";
 import { sizeOptions } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
 import { format } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { ru } from 'date-fns/locale';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { ru } from "date-fns/locale";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
+import { updateTodo } from "../../storage/todoStorage";
 
 type AddTodoProps = {
     showModal: boolean;
     closeModal: () => void;
     onAddTodo: (todo: TodoItem) => void;
+    onUpdateTodo: (id: number, todo: TodoItem) => void;
+    editData: TodoItem | null;
+    setEditData: (todo: TodoItem | null) => void;
 };
 export default function AddTodo({
     showModal,
+    editData = null,
     closeModal,
     onAddTodo,
+    onUpdateTodo,
+    setEditData,
 }: AddTodoProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -33,6 +50,17 @@ export default function AddTodo({
 
     const [nextDate, setNextDate] = useState(new Date());
     const [showDatepicker, setShowDatepicker] = useState(false);
+
+    useEffect(() => {
+        if (editData) {
+            setTitle(editData.title);
+            setDescription(editData.description);
+            setIsRepeat(editData.isRepeat);
+            setRepeatFrequency(editData.repeatFrequency.toString());
+            setSize(editData.size);
+            setNextDate(new Date(editData.nextDate));
+        }
+    }, [editData]);
 
     const clearFields = () => {
         setTitle("");
@@ -71,6 +99,13 @@ export default function AddTodo({
         });
     };
 
+    const onModalClose = () => {
+        clearFields();
+        closeModal();
+        clearErrors();
+        setEditData(null);
+    };
+
     const onCreate = () => {
         if (!title) {
             setError({
@@ -86,8 +121,9 @@ export default function AddTodo({
             });
             return;
         }
-        const newTask: TodoItem = {
-            id: Date.now(),
+
+        const newTask = {
+            id: editData ? editData.id : Date.now(),
             title,
             description,
             lastUpdated: format(new Date(), "yyyy-MM-dd"),
@@ -96,17 +132,15 @@ export default function AddTodo({
             nextDate: format(nextDate, "yyyy-MM-dd"),
             size,
         };
+        if (editData) {
+            onUpdateTodo(editData.id, newTask);
+        } else {
+            onAddTodo(newTask);
+        }
 
-        onAddTodo(newTask);
-        clearFields();
-        closeModal();
+        onModalClose();
     };
 
-    const onModalClose = () => {
-        clearFields();
-        closeModal();
-        clearErrors();
-    };
     return (
         <Modal
             visible={showModal}
@@ -119,10 +153,11 @@ export default function AddTodo({
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 keyboardVerticalOffset={40}
             >
-                <ScrollView
-                    keyboardShouldPersistTaps="handled"
-                >
-                    <Text style={styles.addModalTitle}>Добавить дело</Text>
+                <ScrollView keyboardShouldPersistTaps="handled">
+                    <Text style={styles.addModalTitle}>
+                        {" "}
+                        {editData ? "Изменить дело" : "Добавить дело"}
+                    </Text>
 
                     <TextInput
                         style={styles.input}
@@ -168,7 +203,9 @@ export default function AddTodo({
                         <Text style={styles.error}>{error.repeatFrequency}</Text>
                     )}
 
-                    <Text style={styles.pickerLabel}>Размер дела? (как долго делать?)</Text>
+                    <Text style={styles.pickerLabel}>
+                        Размер дела? (как долго делать?)
+                    </Text>
                     <Picker
                         selectedValue={size}
                         onValueChange={(itemValue) => setSize(itemValue)}
@@ -184,7 +221,10 @@ export default function AddTodo({
 
                     <View style={styles.datePickerContainer}>
                         <Text style={styles.pickerLabel}>Дата выполнения</Text>
-                        <Pressable style={styles.datePicker} onPress={() => setShowDatepicker(true)}>
+                        <Pressable
+                            style={styles.datePicker}
+                            onPress={() => setShowDatepicker(true)}
+                        >
                             <Text>{format(nextDate, "d LLL yyyy", { locale: ru })}</Text>
                             <EvilIcons name="calendar" size={24} color="black" />
                         </Pressable>

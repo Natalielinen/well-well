@@ -7,7 +7,6 @@ import { ru } from "date-fns/locale";
 import Octicons from "@expo/vector-icons/Octicons";
 import CustomButton from "../../ui/CustomButton/CustomButton";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
-import { useState } from "react";
 
 type TodoProps = {
     todo: TodoItem;
@@ -15,6 +14,7 @@ type TodoProps = {
     setShowExtraId: (id: number | null) => void;
     isTodoExpired: boolean;
     getAllTodos: () => Promise<void>;
+    openEditModal: () => void;
 };
 export default function Todo({
     todo,
@@ -22,9 +22,8 @@ export default function Todo({
     setShowExtraId,
     isTodoExpired,
     getAllTodos,
+    openEditModal
 }: TodoProps) {
-
-
     const onTaskDelete = async () => {
         await removeTodo(todo.id);
         getAllTodos();
@@ -182,7 +181,7 @@ export default function Todo({
                         variant="secondary"
                     />
                     <CustomButton
-                        onClick={() => console.log("delete")}
+                        onClick={openEditModal}
                         text="Изменить"
                         variant="secondary"
                     />
