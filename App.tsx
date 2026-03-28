@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Button, Modal, FlatList, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
@@ -29,6 +29,8 @@ export default function App() {
   const [showAll, setShowAll] = useState(false);
 
   const [editData, setEditData] = useState<TodoItem | null>(null);
+
+  const flatListRef = useRef<FlatList>(null);
 
   const isExpired = (todo: TodoItem) =>
     isBefore(
@@ -104,6 +106,10 @@ export default function App() {
     setShowAddModal(true);
   }
 
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.appContainer}>
@@ -138,6 +144,7 @@ export default function App() {
         </View>
 
         <FlatList
+          ref={flatListRef}
           contentContainerStyle={styles.appScrollableContainer}
           data={displayedTodos}
           keyExtractor={(item) => item.id.toString()}
@@ -156,7 +163,7 @@ export default function App() {
           } // TODO: добавить кастомный компонент
           ListFooterComponent={
             displayedTodos.length > 10 ? (
-              <Pressable style={styles.backToTopButton}>
+              <Pressable style={styles.backToTopButton} onPress={scrollToTop}>
                 <Text style={styles.backToTopButtonText}>
                   К началу списка ↑
                 </Text>
