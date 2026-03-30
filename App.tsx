@@ -9,6 +9,7 @@ import AddTodo from "./components/AddTodo/AddTodo";
 import {
   addDays,
   format,
+  isAfter,
   isBefore,
   isSameDay,
   parse,
@@ -16,7 +17,6 @@ import {
   subDays,
 } from "date-fns";
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -40,6 +40,9 @@ export default function App() {
 
   const isToday = (todo: TodoItem) =>
     isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
+
+  const isFuture = (todo: TodoItem) =>
+    isAfter(parse(todo.nextDate, "yyyy-MM-dd", new Date()), startOfDay(new Date()));
 
   const sortByDate = (todos: TodoItem[]) =>
     [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
@@ -152,6 +155,7 @@ export default function App() {
             <Todo
               todo={item}
               isTodoExpired={isExpired(item)}
+              isFuture={isFuture(item)}
               setShowExtraId={setShowExtraId}
               showExtraId={showExtraId}
               getAllTodos={getAllTodos}
