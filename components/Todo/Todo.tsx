@@ -7,12 +7,14 @@ import { ru } from "date-fns/locale";
 import Octicons from "@expo/vector-icons/Octicons";
 import CustomButton from "../../ui/CustomButton/CustomButton";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
+import { useEffect } from "react";
 
 type TodoProps = {
     todo: TodoItem;
     showExtraId: number | null;
     setShowExtraId: (id: number | null) => void;
     isTodoExpired: boolean;
+    isFuture: boolean;
     getAllTodos: () => Promise<void>;
     openEditModal: () => void;
 };
@@ -21,13 +23,14 @@ export default function Todo({
     showExtraId,
     setShowExtraId,
     isTodoExpired,
+    isFuture,
     getAllTodos,
-    openEditModal
+    openEditModal,
 }: TodoProps) {
     const onTaskDelete = async () => {
         await removeTodo(todo.id);
         getAllTodos();
-    }
+    };
 
     const showAlert = (title: string, message: string) => {
         Alert.alert(title, message, [
@@ -38,10 +41,12 @@ export default function Todo({
         ]);
     };
 
-    const showAlertForExpiredTask = () => {
+    const showAlertForExpiredTask = (isFuture: boolean) => {
         Alert.alert(
             "Внимание!",
-            "Задача была просрочена, какую дату выполнения вы хотите выбрать?",
+            isFuture
+                ? "Дата выполнения задачи еще не наступила. Какую дату выполнения вы хотите выбрать?"
+                : "Задача была просрочена, какую дату выполнения вы хотите выбрать?",
             [
                 {
                     text: "Сегодня",
@@ -76,21 +81,17 @@ export default function Todo({
     };
 
     const showDeleteAlert = () => {
-        Alert.alert(
-            "Внимание!",
-            "Вы уверены, что хотите удалить задачу?",
-            [
-                {
-                    text: "Да",
-                    onPress: onTaskDelete,
-                },
-                {
-                    text: "Нет",
-                    style: "cancel",
-                },
-            ],
-        );
-    }
+        Alert.alert("Внимание!", "Вы уверены, что хотите удалить задачу?", [
+            {
+                text: "Да",
+                onPress: onTaskDelete,
+            },
+            {
+                text: "Нет",
+                style: "cancel",
+            },
+        ]);
+    };
 
     const onPress = () => {
         setShowExtraId(showExtraId === todo.id ? null : todo.id);
@@ -107,6 +108,8 @@ export default function Todo({
                 "Успешно",
                 "Выполнена не повторяющаяся задача. Задача удалена из списка дел",
             );
+        } else if (todo.isRepeat && isFuture) {
+            showAlertForExpiredTask(true);
         } else if (todo.isRepeat && !isTodoExpired) {
             const newNextDate = addDays(
                 new Date(todo.nextDate),
@@ -122,10 +125,9 @@ export default function Todo({
                 `Выполнена повторяющаяся задача. Дата следующего выполнения: ${format(newNextDate, "d LLL yyyy", { locale: ru })}`,
             );
         } else if (todo.isRepeat && isTodoExpired) {
-            showAlertForExpiredTask();
+            showAlertForExpiredTask(false);
         }
     };
-
 
     return (
         <>
