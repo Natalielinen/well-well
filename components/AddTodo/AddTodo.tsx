@@ -16,11 +16,10 @@ import CustomButton from "../../ui/CustomButton/CustomButton";
 import { colors } from "../../themes/colors";
 import { sizeOptions } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
-import { format } from "date-fns";
+import { format, isBefore, startOfDay } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ru } from "date-fns/locale";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
-import { updateTodo } from "../../storage/todoStorage";
 
 type AddTodoProps = {
     showModal: boolean;
@@ -46,6 +45,7 @@ export default function AddTodo({
     const [error, setError] = useState({
         title: "",
         repeatFrequency: "",
+        minDate: "",
     });
 
     const [nextDate, setNextDate] = useState(new Date());
@@ -75,6 +75,7 @@ export default function AddTodo({
         setError({
             title: "",
             repeatFrequency: "",
+            minDate: "",
         });
     };
 
@@ -87,6 +88,11 @@ export default function AddTodo({
     };
 
     const onNextDateChange = (event: any, selectedDate?: Date) => {
+        setError({
+            ...error,
+            minDate: "",
+        });
+
         setShowDatepicker(Platform.OS === "ios");
         if (selectedDate) setNextDate(selectedDate);
     };
@@ -118,6 +124,13 @@ export default function AddTodo({
             setError({
                 ...error,
                 repeatFrequency: "Введите частоту повторения",
+            });
+            return;
+        }
+        if (isBefore(nextDate, startOfDay(new Date()))) {
+            setError({
+                ...error,
+                minDate: "Дата не может быть в прошлом",
             });
             return;
         }
@@ -155,7 +168,6 @@ export default function AddTodo({
             >
                 <ScrollView keyboardShouldPersistTaps="handled">
                     <Text style={styles.addModalTitle}>
-                        {" "}
                         {editData ? "Изменить дело" : "Добавить дело"}
                     </Text>
 
@@ -235,8 +247,10 @@ export default function AddTodo({
                                 mode="date"
                                 display="default"
                                 onChange={onNextDateChange}
+                                minimumDate={new Date()}
                             />
                         )}
+                        {error.minDate && <Text style={styles.error}>{error.minDate}</Text>}
                     </View>
 
                     <View style={styles.addModalButtons}>
