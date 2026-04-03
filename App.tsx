@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Button, Modal, FlatList, Pressable } from "react-native";
+import { View, Text, Button, Modal, FlatList, Pressable, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
@@ -17,6 +17,7 @@ import {
   subDays,
 } from "date-fns";
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -29,6 +30,7 @@ export default function App() {
   const [showAll, setShowAll] = useState(false);
 
   const [editData, setEditData] = useState<TodoItem | null>(null);
+  const [showDatepicker, setShowDatepicker] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -113,6 +115,12 @@ export default function App() {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
+  const onNextDateChange = (event: any, selectedDate?: Date) => {
+
+    setShowDatepicker(Platform.OS === "ios");
+    if (selectedDate) setSelectedDate(selectedDate);
+  };
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.appContainer}>
@@ -138,7 +146,19 @@ export default function App() {
               new Date(),
             )}
           />
-          <Text style={styles.dateText}> {today} </Text>
+          <Pressable onPress={() => setShowDatepicker(true)}>
+            <Text style={styles.dateText}> {today} </Text>
+          </Pressable>
+          {showDatepicker && (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="default"
+              onChange={onNextDateChange}
+              minimumDate={new Date()}
+            />
+          )}
+
           <CustomButton
             onClick={() => onDateChange("next")}
             text=">"
