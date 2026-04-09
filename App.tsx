@@ -18,6 +18,7 @@ import {
 } from "date-fns";
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { StatusBar } from "expo-status-bar";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -123,6 +124,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
+      <StatusBar style="dark" />
       <View style={styles.appContainer}>
         <View style={styles.appHeader}>
           <CustomButton
