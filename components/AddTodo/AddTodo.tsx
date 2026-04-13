@@ -20,6 +20,7 @@ import { format, isBefore, startOfDay } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ru } from "date-fns/locale";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type AddTodoProps = {
     showModal: boolean;
@@ -161,104 +162,106 @@ export default function AddTodo({
             animationType="slide"
             presentationStyle="pageSheet"
         >
-            <KeyboardAvoidingView
-                style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={40}
-            >
-                <ScrollView keyboardShouldPersistTaps="handled">
-                    <Text style={styles.addModalTitle}>
-                        {editData ? "Изменить дело" : "Добавить дело"}
-                    </Text>
+            <SafeAreaView style={{ flex: 1 }}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    keyboardVerticalOffset={40}
+                >
+                    <ScrollView keyboardShouldPersistTaps="handled">
+                        <Text style={styles.addModalTitle}>
+                            {editData ? "Изменить дело" : "Добавить дело"}
+                        </Text>
 
-                    <TextInput
-                        style={styles.input}
-                        value={title}
-                        onChangeText={onTitleChange}
-                        placeholder="Название"
-                        autoCapitalize="none"
-                    />
-                    {error.title && <Text style={styles.error}>{error.title}</Text>}
-
-                    <TextInput
-                        style={[styles.input, styles.multiline]}
-                        value={description}
-                        onChangeText={setDescription}
-                        placeholder="Описание"
-                        autoCapitalize="none"
-                        multiline
-                    />
-
-                    <View style={styles.switchContainer}>
-                        <Text style={styles.switchLabel}>Повторяющееся дело?</Text>
-                        <Switch
-                            value={isRepeat}
-                            onValueChange={setIsRepeat}
-                            trackColor={{
-                                true: colors.primary,
-                            }}
-                            thumbColor={colors.primaryDark}
-                        />
-                    </View>
-
-                    {isRepeat && (
                         <TextInput
                             style={styles.input}
-                            value={repeatFrequency}
-                            onChangeText={onRepeatFrequencyChange}
-                            placeholder="Как часто повторять? (в днях)"
+                            value={title}
+                            onChangeText={onTitleChange}
+                            placeholder="Название"
                             autoCapitalize="none"
-                            keyboardType="numeric"
                         />
-                    )}
-                    {isRepeat && error.repeatFrequency && (
-                        <Text style={styles.error}>{error.repeatFrequency}</Text>
-                    )}
+                        {error.title && <Text style={styles.error}>{error.title}</Text>}
 
-                    <Text style={styles.pickerLabel}>
-                        Размер дела? (как долго делать?)
-                    </Text>
-                    <Picker
-                        selectedValue={size}
-                        onValueChange={(itemValue) => setSize(itemValue)}
-                    >
-                        {sizeOptions.map((option) => (
-                            <Picker.Item
-                                key={option.value}
-                                label={option.label}
-                                value={option.value}
+                        <TextInput
+                            style={[styles.input, styles.multiline]}
+                            value={description}
+                            onChangeText={setDescription}
+                            placeholder="Описание"
+                            autoCapitalize="none"
+                            multiline
+                        />
+
+                        <View style={styles.switchContainer}>
+                            <Text style={styles.switchLabel}>Повторяющееся дело?</Text>
+                            <Switch
+                                value={isRepeat}
+                                onValueChange={setIsRepeat}
+                                trackColor={{
+                                    true: colors.primary,
+                                }}
+                                thumbColor={colors.primaryDark}
                             />
-                        ))}
-                    </Picker>
+                        </View>
 
-                    <View style={styles.datePickerContainer}>
-                        <Text style={styles.pickerLabel}>Дата выполнения</Text>
-                        <Pressable
-                            style={styles.datePicker}
-                            onPress={() => setShowDatepicker(true)}
-                        >
-                            <Text>{format(nextDate, "d LLL yyyy", { locale: ru })}</Text>
-                            <EvilIcons name="calendar" size={24} color="black" />
-                        </Pressable>
-
-                        {showDatepicker && (
-                            <DateTimePicker
-                                value={nextDate}
-                                mode="date"
-                                display="default"
-                                onChange={onNextDateChange}
-                                minimumDate={new Date()}
+                        {isRepeat && (
+                            <TextInput
+                                style={styles.input}
+                                value={repeatFrequency}
+                                onChangeText={onRepeatFrequencyChange}
+                                placeholder="Как часто повторять? (в днях)"
+                                autoCapitalize="none"
+                                keyboardType="numeric"
                             />
                         )}
-                        {error.minDate && <Text style={styles.error}>{error.minDate}</Text>}
-                    </View>
+                        {isRepeat && error.repeatFrequency && (
+                            <Text style={styles.error}>{error.repeatFrequency}</Text>
+                        )}
 
-                    <View style={styles.addModalButtons}>
-                        <CustomButton text="ЗАКРЫТЬ" onClick={onModalClose} />
-                        <CustomButton text="СОХРАНИТЬ" onClick={onCreate} />
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+                        <Text style={styles.pickerLabel}>
+                            Размер дела? (как долго делать?)
+                        </Text>
+                        <Picker
+                            selectedValue={size}
+                            onValueChange={(itemValue) => setSize(itemValue)}
+                        >
+                            {sizeOptions.map((option) => (
+                                <Picker.Item
+                                    key={option.value}
+                                    label={option.label}
+                                    value={option.value}
+                                />
+                            ))}
+                        </Picker>
+
+                        <View style={styles.datePickerContainer}>
+                            <Text style={styles.pickerLabel}>Дата выполнения</Text>
+                            <Pressable
+                                style={styles.datePicker}
+                                onPress={() => setShowDatepicker(true)}
+                            >
+                                <Text>{format(nextDate, "d LLL yyyy", { locale: ru })}</Text>
+                                <EvilIcons name="calendar" size={24} color="black" />
+                            </Pressable>
+
+                            {showDatepicker && (
+                                <DateTimePicker
+                                    value={nextDate}
+                                    mode="date"
+                                    display="default"
+                                    onChange={onNextDateChange}
+                                    minimumDate={new Date()}
+                                />
+                            )}
+                            {error.minDate && <Text style={styles.error}>{error.minDate}</Text>}
+                        </View>
+
+                        <View style={styles.addModalButtons}>
+                            <CustomButton text="ЗАКРЫТЬ" onClick={onModalClose} />
+                            <CustomButton text="СОХРАНИТЬ" onClick={onCreate} />
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
         </Modal>
     );
 }
