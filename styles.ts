@@ -71,6 +71,7 @@ export const styles = StyleSheet.create({
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
     color: colors.textPrimary,
+    maxWidth: "73%"
   },
   todoDescription: {
     marginTop: 4,

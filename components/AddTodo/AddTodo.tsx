@@ -179,6 +179,7 @@ export default function AddTodo({
                             onChangeText={onTitleChange}
                             placeholder="Название"
                             autoCapitalize="none"
+                            maxLength={100}
                         />
                         {error.title && <Text style={styles.error}>{error.title}</Text>}
 
