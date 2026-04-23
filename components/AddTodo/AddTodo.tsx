@@ -178,6 +178,7 @@ export default function AddTodo({
                             value={title}
                             onChangeText={onTitleChange}
                             placeholder="Название"
+                            placeholderTextColor="#999"
                             autoCapitalize="none"
                             maxLength={100}
                         />
@@ -188,6 +189,7 @@ export default function AddTodo({
                             value={description}
                             onChangeText={setDescription}
                             placeholder="Описание"
+                            placeholderTextColor="#999"
                             autoCapitalize="none"
                             multiline
                         />
@@ -210,6 +212,7 @@ export default function AddTodo({
                                 value={repeatFrequency}
                                 onChangeText={onRepeatFrequencyChange}
                                 placeholder="Как часто повторять? (в днях)"
+                                placeholderTextColor="#999"
                                 autoCapitalize="none"
                                 keyboardType="numeric"
                             />
@@ -230,6 +233,7 @@ export default function AddTodo({
                                     key={option.value}
                                     label={option.label}
                                     value={option.value}
+                                    color="#000"
                                 />
                             ))}
                         </Picker>
