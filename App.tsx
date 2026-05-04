@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Button, Modal, FlatList, Pressable, Platform } from "react-native";
+import { View, Text, Button, Modal, FlatList, Pressable, Platform, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
@@ -19,6 +19,12 @@ import {
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { StatusBar } from "expo-status-bar";
+import {
+  MobileAds, AdTheme, BannerAdSize, BannerView, Gender, Location
+} from "yandex-mobile-ads";
+
+
+
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -33,7 +39,24 @@ export default function App() {
   const [editData, setEditData] = useState<TodoItem | null>(null);
   const [showDatepicker, setShowDatepicker] = useState(false);
 
+  const { width } = Dimensions.get('window');
+
+  const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
+
+  useEffect(() => {
+    BannerAdSize.stickySize(width).then(setBannerSize);
+  }, []);
+
   const flatListRef = useRef<FlatList>(null);
+
+
+
+  useEffect(() => {
+    (async () => {
+      // Configure the user privacy data policy before init sdk
+      await MobileAds.initialize();
+    })();
+  })
 
   const isExpired = (todo: TodoItem) =>
     isBefore(
@@ -197,6 +220,18 @@ export default function App() {
             ) : null
           }
         />
+        {
+          bannerSize && <BannerView
+            size={bannerSize}
+            adRequest={{
+              adUnitId: 'R-M-19204363-1',
+            }}
+            style={{ width: '100%', height: 100 }}
+            onAdLoaded={() => console.log('loaded')}
+            onAdFailedToLoad={(e) => console.log('error', e.nativeEvent)}
+          />
+        }
+
 
         <Modal
           visible={exitModalVusible}
