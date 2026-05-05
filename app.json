@@ -23,7 +23,8 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.natalielinen.wellWell"
+      "package": "com.natalielinen.wellWell",
+      "versionCode": 2
     },
     "androidStatusBar": {
       "barStyle": "dark-content",
