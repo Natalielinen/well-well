@@ -29,6 +29,7 @@ type AddTodoProps = {
     onUpdateTodo: (id: number, todo: TodoItem) => void;
     editData: TodoItem | null;
     setEditData: (todo: TodoItem | null) => void;
+    currentDate: Date;
 };
 export default function AddTodo({
     showModal,
@@ -37,6 +38,7 @@ export default function AddTodo({
     onAddTodo,
     onUpdateTodo,
     setEditData,
+    currentDate,
 }: AddTodoProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -51,6 +53,12 @@ export default function AddTodo({
 
     const [nextDate, setNextDate] = useState(new Date());
     const [showDatepicker, setShowDatepicker] = useState(false);
+
+    useEffect(() => {
+        if (currentDate) {
+            setNextDate(currentDate);
+        }
+    }, [currentDate]);
 
     useEffect(() => {
         if (editData) {
@@ -257,7 +265,9 @@ export default function AddTodo({
                                     minimumDate={new Date()}
                                 />
                             )}
-                            {error.minDate && <Text style={styles.error}>{error.minDate}</Text>}
+                            {error.minDate && (
+                                <Text style={styles.error}>{error.minDate}</Text>
+                            )}
                         </View>
 
                         <View style={styles.addModalButtons}>

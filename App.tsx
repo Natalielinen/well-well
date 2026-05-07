@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Button, Modal, FlatList, Pressable, Platform, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  Modal,
+  FlatList,
+  Pressable,
+  Platform,
+  Dimensions,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
@@ -19,12 +28,7 @@ import {
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { StatusBar } from "expo-status-bar";
-import {
-  MobileAds, AdTheme, BannerAdSize, BannerView, Gender, Location
-} from "yandex-mobile-ads";
-
-
-
+import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 
 export default function App() {
   const [exitModalVusible, setExitModalVisible] = useState(false);
@@ -39,7 +43,7 @@ export default function App() {
   const [editData, setEditData] = useState<TodoItem | null>(null);
   const [showDatepicker, setShowDatepicker] = useState(false);
 
-  const { width } = Dimensions.get('window');
+  const { width } = Dimensions.get("window");
 
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
 
@@ -49,14 +53,12 @@ export default function App() {
 
   const flatListRef = useRef<FlatList>(null);
 
-
-
   useEffect(() => {
     (async () => {
       // Configure the user privacy data policy before init sdk
       await MobileAds.initialize();
     })();
-  })
+  });
 
   const isExpired = (todo: TodoItem) =>
     isBefore(
@@ -68,7 +70,10 @@ export default function App() {
     isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
 
   const isFuture = (todo: TodoItem) =>
-    isAfter(parse(todo.nextDate, "yyyy-MM-dd", new Date()), startOfDay(new Date()));
+    isAfter(
+      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
+      startOfDay(new Date()),
+    );
 
   const sortByDate = (todos: TodoItem[]) =>
     [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
@@ -123,7 +128,7 @@ export default function App() {
     await updateTodo(id, updatedTodo);
 
     getAllTodos();
-  }
+  };
 
   const onFilterChange = () => {
     setShowAll((prev) => !prev);
@@ -133,14 +138,13 @@ export default function App() {
   const openEditModal = (editData: TodoItem) => {
     setEditData(editData);
     setShowAddModal(true);
-  }
+  };
 
   const scrollToTop = () => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
   const onNextDateChange = (event: any, selectedDate?: Date) => {
-
     setShowDatepicker(Platform.OS === "ios");
     if (selectedDate) setSelectedDate(selectedDate);
   };
@@ -220,18 +224,17 @@ export default function App() {
             ) : null
           }
         />
-        {
-          bannerSize && <BannerView
+        {bannerSize && (
+          <BannerView
             size={bannerSize}
             adRequest={{
-              adUnitId: 'R-M-19204363-1',
+              adUnitId: "R-M-19204363-1",
             }}
-            style={{ width: '100%', height: 100 }}
-            onAdLoaded={() => console.log('loaded')}
-            onAdFailedToLoad={(e) => console.log('error', e.nativeEvent)}
+            style={{ width: "100%", height: 100 }}
+            onAdLoaded={() => console.log("loaded")}
+            onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
           />
-        }
-
+        )}
 
         <Modal
           visible={exitModalVusible}
@@ -253,6 +256,7 @@ export default function App() {
           onUpdateTodo={onUpdateTodo}
           editData={editData}
           setEditData={setEditData}
+          currentDate={selectedDate}
         />
       </View>
     </SafeAreaView>
