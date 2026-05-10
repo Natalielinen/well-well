@@ -8,6 +8,7 @@ import {
   Pressable,
   Platform,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -32,6 +33,8 @@ import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 import { colors } from "./themes/colors";
 import Header from "./components/Header/Header";
+import WeekStrip from "./components/WeekStrip/WeekStrip";
+import { Plus } from "lucide-react-native";
 
 export default function App() {
 
@@ -72,6 +75,11 @@ export default function App() {
   // new header
   const toggleShowAll = useCallback(() => {
     setShowAll(prev => !prev);
+  }, []);
+
+  const selectDate = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setShowAll(false);
   }, []);
 
   const flatListRef = useRef<FlatList>(null);
@@ -182,6 +190,75 @@ export default function App() {
         onNextDate={() => changeDate(1)}
         onShowAll={toggleShowAll}
       />
+
+      {!showAll && (
+        <WeekStrip
+          selectedDate={selectedDate}
+          onSelectDate={selectDate}
+          tasks={allTodos}
+        />
+      )}
+
+      <FlatList
+        ref={flatListRef}
+        contentContainerStyle={styles.appScrollableContainer}
+        data={displayedTodos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <Todo
+            todo={item}
+            isTodoExpired={isExpired(item)}
+            isFuture={isFuture(item)}
+            setShowExtraId={setShowExtraId}
+            showExtraId={showExtraId}
+            getAllTodos={getAllTodos}
+            openEditModal={() => openEditModal(item)}
+          />
+        )}
+        ListEmptyComponent={
+          <Text style={styles.emptyListText}>На сегодня задач нет</Text>
+        } // TODO: добавить кастомный компонент
+        ListFooterComponent={
+          displayedTodos.length > 10 ? (
+            <Pressable style={styles.backToTopButton} onPress={scrollToTop}>
+              <Text style={styles.backToTopButtonText}>
+                К началу списка ↑
+              </Text>
+            </Pressable>
+          ) : null
+        }
+      />
+
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowAddModal(true)}
+        activeOpacity={0.8}
+      >
+        <Plus color="white" size={24} strokeWidth={2.5} />
+      </TouchableOpacity>
+
+      <AddTodo
+        showModal={showAddModal}
+        closeModal={onModalClose}
+        onAddTodo={onAddTodo}
+        onUpdateTodo={onUpdateTodo}
+        editData={editData}
+        setEditData={setEditData}
+        currentDate={selectedDate}
+      />
+
+      {bannerSize && (
+        <BannerView
+          size={bannerSize}
+          adRequest={{
+            adUnitId: "R-M-19204363-1",
+          }}
+          style={{ width: "100%", height: 100 }}
+          onAdLoaded={() => console.log("loaded")}
+          onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
+        />
+      )}
+
     </GestureHandlerRootView>
     // <SafeAreaView style={styles.safeContainer}>
     //   <StatusBar style="dark" />
