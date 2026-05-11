@@ -35,6 +35,7 @@ import { colors } from "./themes/colors";
 import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import { Plus } from "lucide-react-native";
+import EmptyState from "./components/EmptyState/EmptyState";
 
 export default function App() {
 
@@ -188,7 +189,7 @@ export default function App() {
         currentDate={selectedDate}
         onPrevDate={() => changeDate(-1)}
         onNextDate={() => changeDate(1)}
-        onShowAll={toggleShowAll}
+        onShowAll={onFilterChange}
       />
 
       {!showAll && (
@@ -216,8 +217,8 @@ export default function App() {
           />
         )}
         ListEmptyComponent={
-          <Text style={styles.emptyListText}>На сегодня задач нет</Text>
-        } // TODO: добавить кастомный компонент
+          <EmptyState />
+        }
         ListFooterComponent={
           displayedTodos.length > 10 ? (
             <Pressable style={styles.backToTopButton} onPress={scrollToTop}>

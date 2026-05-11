@@ -95,9 +95,10 @@ export const styles = StyleSheet.create({
     color: colors.primary,
   },
   appScrollableContainer: {
-    rowGap: 24,
+    rowGap: 16,
     paddingTop: 16,
     paddingBottom: "4%",
+    paddingHorizontal: 8,
   },
   todoItem: {
     padding: 12,
