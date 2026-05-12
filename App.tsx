@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -9,8 +15,9 @@ import {
   Platform,
   Dimensions,
   TouchableOpacity,
+  KeyboardAvoidingView,
 } from "react-native";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
@@ -35,10 +42,10 @@ import { colors } from "./themes/colors";
 import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import { Plus } from "lucide-react-native";
+import BottomSheet from "@gorhom/bottom-sheet";
 import EmptyState from "./components/EmptyState/EmptyState";
 
 export default function App() {
-
   // for new header
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -59,13 +66,15 @@ export default function App() {
 
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
 
+  const bottomSheetRef = useRef(null);
+
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);
   }, []);
 
   // Date navigation // new header
   const changeDate = useCallback((days: number) => {
-    setSelectedDate(prev => {
+    setSelectedDate((prev) => {
       const newDate = new Date(prev);
       newDate.setDate(newDate.getDate() + days);
       return newDate;
@@ -75,7 +84,7 @@ export default function App() {
 
   // new header
   const toggleShowAll = useCallback(() => {
-    setShowAll(prev => !prev);
+    setShowAll((prev) => !prev);
   }, []);
 
   const selectDate = useCallback((date: Date) => {
@@ -216,15 +225,11 @@ export default function App() {
             openEditModal={() => openEditModal(item)}
           />
         )}
-        ListEmptyComponent={
-          <EmptyState />
-        }
+        ListEmptyComponent={<EmptyState />}
         ListFooterComponent={
           displayedTodos.length > 10 ? (
             <Pressable style={styles.backToTopButton} onPress={scrollToTop}>
-              <Text style={styles.backToTopButtonText}>
-                К началу списка ↑
-              </Text>
+              <Text style={styles.backToTopButtonText}>К началу списка ↑</Text>
             </Pressable>
           ) : null
         }
@@ -259,7 +264,6 @@ export default function App() {
           onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
         />
       )}
-
     </GestureHandlerRootView>
     // <SafeAreaView style={styles.safeContainer}>
     //   <StatusBar style="dark" />
