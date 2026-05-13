@@ -66,8 +66,6 @@ export default function App() {
 
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
 
-  const bottomSheetRef = useRef(null);
-
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);
   }, []);
@@ -116,6 +114,7 @@ export default function App() {
       startOfDay(new Date()),
     );
 
+
   const sortByDate = (todos: TodoItem[]) =>
     [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
 
@@ -152,6 +151,11 @@ export default function App() {
   }, [selectedDate]);
 
   const onModalClose = () => setShowAddModal(false);
+
+  const disabledPreviousDates = isBefore(
+    parse(today, "dd.MM.yyyy", new Date()),
+    new Date(),
+  )
 
   const onDateChange = (type: "prev" | "next") => {
     setSelectedDate((prev) =>
@@ -199,6 +203,7 @@ export default function App() {
         onPrevDate={() => changeDate(-1)}
         onNextDate={() => changeDate(1)}
         onShowAll={onFilterChange}
+        disabledPreviousDates={disabledPreviousDates}
       />
 
       {!showAll && (

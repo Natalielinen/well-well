@@ -3,15 +3,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { styles } from "./styles"
 import { colors } from "../../themes/colors";
 import { ChevronLeft, ChevronRight, Menu } from 'lucide-react-native';
+import { isBefore, parse } from "date-fns";
 
 interface HeaderProps {
     onShowAll: () => void;
     currentDate: Date;
     onPrevDate: () => void;
     onNextDate: () => void;
+    disabledPreviousDates: boolean;
 }
 
-export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll }: HeaderProps) {
+export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll, disabledPreviousDates }: HeaderProps) {
+
+
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('ru-RU', {
             day: 'numeric',
@@ -34,8 +38,8 @@ export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll 
             </View>
 
             <View style={styles.dateNav}>
-                <TouchableOpacity onPress={onPrevDate} style={styles.dateButton}>
-                    <ChevronLeft color="white" size={24} />
+                <TouchableOpacity onPress={onPrevDate} style={styles.dateButton} disabled={disabledPreviousDates} >
+                    <ChevronLeft color="white" style={{ opacity: disabledPreviousDates ? 0.5 : 1 }} size={24} />
                 </TouchableOpacity>
                 <Text style={styles.currentDate}>{formatDate(currentDate)}</Text>
                 <TouchableOpacity onPress={onNextDate} style={styles.dateButton}>

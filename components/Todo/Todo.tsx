@@ -9,7 +9,7 @@ import CustomButton from "../../ui/CustomButton/CustomButton";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
 import { useEffect } from "react";
 import { colors } from "../../themes/colors";
-import { Check, ChevronDown, Repeat, Clock, Delete, Trash2, Pen } from 'lucide-react-native';
+import { Check, ChevronDown, Repeat, Clock, Delete, Trash2, Pen, FileExclamationPoint } from 'lucide-react-native';
 
 type TodoProps = {
     todo: TodoItem;
@@ -149,6 +149,17 @@ export default function Todo({
                                 {todo.title}
                             </Text>
                             <View style={styles.badges}>
+
+                                {
+                                    isTodoExpired && (
+                                        <View style={[styles.badge, { backgroundColor: colors.dangerLight }]}>
+                                            <FileExclamationPoint size={12} color={colors.danger} />
+                                            <Text style={[styles.badgeText, { color: colors.danger }]}>
+                                                Просрочена
+                                            </Text>
+                                        </View>
+                                    )
+                                }
                                 {todo.repeatFrequency > 0 && (
                                     <View style={[styles.badge, { backgroundColor: colors.primaryGhost }]}>
                                         <Repeat size={12} color={colors.primaryDark} />

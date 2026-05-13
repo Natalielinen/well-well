@@ -49,4 +49,10 @@ export const styles = StyleSheet.create({
     dotActive: {
         backgroundColor: 'white',
     },
+    dayTextDisabled: {
+        opacity: 0.5,
+    },
+    dayPillDisabled: {
+    opacity: 0.4,
+},
 });
