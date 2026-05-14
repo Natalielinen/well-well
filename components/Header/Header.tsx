@@ -1,9 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native"
-import { LinearGradient } from 'expo-linear-gradient';
-import { styles } from "./styles"
+import { View, Text, TouchableOpacity } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { styles } from "./styles";
 import { colors } from "../../themes/colors";
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react-native';
-import { isBefore, parse } from "date-fns";
+import { ChevronLeft, ChevronRight, Menu } from "lucide-react-native";
 
 interface HeaderProps {
     onShowAll: () => void;
@@ -13,14 +12,18 @@ interface HeaderProps {
     disabledPreviousDates: boolean;
 }
 
-export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll, disabledPreviousDates }: HeaderProps) {
-
-
+export default function Header({
+    currentDate,
+    onPrevDate,
+    onNextDate,
+    onShowAll,
+    disabledPreviousDates,
+}: HeaderProps) {
     const formatDate = (date: Date) => {
-        return date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
+        return date.toLocaleDateString("ru-RU", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
         });
     };
     return (
@@ -32,14 +35,26 @@ export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll,
         >
             <View style={styles.headerTop}>
                 <Text style={styles.headerTitle}>Мои дела</Text>
-                <TouchableOpacity style={styles.iconButton} onPress={onShowAll} activeOpacity={0.7}>
+                <TouchableOpacity
+                    style={styles.iconButton}
+                    onPress={onShowAll}
+                    activeOpacity={0.7}
+                >
                     <Menu color="white" size={20} />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.dateNav}>
-                <TouchableOpacity onPress={onPrevDate} style={styles.dateButton} disabled={disabledPreviousDates} >
-                    <ChevronLeft color="white" style={{ opacity: disabledPreviousDates ? 0.5 : 1 }} size={24} />
+                <TouchableOpacity
+                    onPress={onPrevDate}
+                    style={styles.dateButton}
+                    disabled={disabledPreviousDates}
+                >
+                    <ChevronLeft
+                        color="white"
+                        style={{ opacity: disabledPreviousDates ? 0.5 : 1 }}
+                        size={24}
+                    />
                 </TouchableOpacity>
                 <Text style={styles.currentDate}>{formatDate(currentDate)}</Text>
                 <TouchableOpacity onPress={onNextDate} style={styles.dateButton}>
@@ -47,6 +62,5 @@ export default function Header({ currentDate, onPrevDate, onNextDate, onShowAll,
                 </TouchableOpacity>
             </View>
         </LinearGradient>
-
-    )
-};
+    );
+}
