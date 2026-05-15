@@ -34,7 +34,8 @@ export const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 16,
+    zIndex: 2,
+    bottom: 24,
     right: 24,
     width: 56,
     height: 56,
