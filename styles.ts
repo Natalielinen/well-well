@@ -1,17 +1,71 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { colors } from "./themes/colors";
+import { colors, radius, shadows, spacing } from "./themes/colors";
 
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
 export const styles = StyleSheet.create({
+  //new
+ container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: spacing.md,
+    paddingBottom: 100,
+  },
+  taskList: {
+    gap: spacing.sm,
+  },
+  allTasksBanner: {
+    backgroundColor: colors.primaryGhost,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  allTasksText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primaryDark,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 36,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadows.lg,
+  },
+  sheetBackground: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+  },
+  sheetHandle: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+  },
+  sheetContent: {
+    flex: 1,
+  },
+
+  // old
   safeContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   appContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   appHeader: {
     width: "100%",
@@ -33,17 +87,18 @@ export const styles = StyleSheet.create({
   pickerItem: {
     fontSize: windowWidth > 500 ? 32 : 16,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.primary,
   },
   dateText: {
     fontSize: windowWidth > 500 ? 32 : 16,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.primary,
   },
   appScrollableContainer: {
-    rowGap: 24,
+    rowGap: 16,
     paddingTop: 16,
     paddingBottom: "4%",
+    paddingHorizontal: 8,
   },
   todoItem: {
     padding: 12,
@@ -70,7 +125,7 @@ export const styles = StyleSheet.create({
   todoTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.primary,
     maxWidth: "73%"
   },
   todoDescription: {
@@ -108,7 +163,7 @@ export const styles = StyleSheet.create({
   emptyListText: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.primary,
     alignSelf: "center",
   },
   customButton: {
@@ -155,10 +210,10 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
   },
   outlinePrimary: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.bg,
     borderWidth: 3,
     borderColor: colors.primaryDark,
   },
@@ -170,7 +225,7 @@ export const styles = StyleSheet.create({
   customButtonText: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "bold",
-    color: colors.textPrimary,
+    color: colors.primary,
   },
   backToTopButton: {
     padding: 14,
@@ -183,13 +238,13 @@ export const styles = StyleSheet.create({
   backToTopButtonText: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.bg,
     alignSelf: "center",
   },
   addModalTitle: {
     fontSize: windowWidth > 500 ? 36 : 18,
     fontWeight: "600",
-    color: colors.textPrimary,
+    color: colors.primary,
     alignSelf: "center",
     padding: 12,
   },

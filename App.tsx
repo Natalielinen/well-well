@@ -1,47 +1,50 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  View,
   Text,
-  Button,
-  Modal,
   FlatList,
   Pressable,
-  Platform,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
-import CustomButton from "./ui/CustomButton/CustomButton";
 import AddTodo from "./components/AddTodo/AddTodo";
 import {
-  addDays,
   format,
   isAfter,
   isBefore,
   isSameDay,
   parse,
   startOfDay,
-  subDays,
 } from "date-fns";
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
+import { colors } from "./themes/colors";
+import Header from "./components/Header/Header";
+import WeekStrip from "./components/WeekStrip/WeekStrip";
+import { Plus } from "lucide-react-native";
+import EmptyState from "./components/EmptyState/EmptyState";
 
 export default function App() {
-  const [exitModalVusible, setExitModalVisible] = useState(false);
-  const [showExtraId, setShowExtraId] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
 
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+
   const [showAll, setShowAll] = useState(false);
 
   const [editData, setEditData] = useState<TodoItem | null>(null);
-  const [showDatepicker, setShowDatepicker] = useState(false);
 
   const { width } = Dimensions.get("window");
 
@@ -49,6 +52,21 @@ export default function App() {
 
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);
+  }, []);
+
+  // Date navigation
+  const changeDate = useCallback((days: number) => {
+    setSelectedDate((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() + days);
+      return newDate;
+    });
+    setShowAll(false);
+  }, []);
+
+  const selectDate = useCallback((date: Date) => {
+    setSelectedDate(date);
+    setShowAll(false);
   }, []);
 
   const flatListRef = useRef<FlatList>(null);
@@ -112,11 +130,10 @@ export default function App() {
 
   const onModalClose = () => setShowAddModal(false);
 
-  const onDateChange = (type: "prev" | "next") => {
-    setSelectedDate((prev) =>
-      type === "prev" ? subDays(prev, 1) : addDays(prev, 1),
-    );
-  };
+  const disabledPreviousDates = isBefore(
+    parse(today, "dd.MM.yyyy", new Date()),
+    new Date(),
+  );
 
   const onAddTodo = async (newTask: TodoItem) => {
     await addTodo(newTask);
@@ -144,121 +161,79 @@ export default function App() {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
   };
 
-  const onNextDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatepicker(Platform.OS === "ios");
-    if (selectedDate) setSelectedDate(selectedDate);
-  };
-
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <StatusBar style="dark" />
-      <View style={styles.appContainer}>
-        <View style={styles.appHeader}>
-          <CustomButton
-            onClick={onFilterChange}
-            text={!showAll ? "Показать все" : " За сегодня"}
-            variant={showAll ? "outlinePrimary" : "primary"}
-          />
-          <CustomButton
-            onClick={() => setShowAddModal(true)}
-            text="+"
-            variant="secondary"
-          />
-        </View>
-        <View style={styles.date}>
-          <CustomButton
-            onClick={() => onDateChange("prev")}
-            text="<"
-            variant="ghost"
-            disabled={isBefore(
-              parse(today, "dd.MM.yyyy", new Date()),
-              new Date(),
-            )}
-          />
-          <Pressable onPress={() => setShowDatepicker(true)}>
-            <Text style={styles.dateText}> {today} </Text>
-          </Pressable>
-          {showDatepicker && (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="default"
-              onChange={onNextDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+    <GestureHandlerRootView style={styles.container}>
+      <StatusBar style="light" backgroundColor={colors.primary} />
 
-          <CustomButton
-            onClick={() => onDateChange("next")}
-            text=">"
-            variant="ghost"
-          />
-        </View>
+      <Header
+        currentDate={selectedDate}
+        onPrevDate={() => changeDate(-1)}
+        onNextDate={() => changeDate(1)}
+        onShowAll={onFilterChange}
+        disabledPreviousDates={disabledPreviousDates}
+      />
 
-        <FlatList
-          ref={flatListRef}
-          contentContainerStyle={styles.appScrollableContainer}
-          data={displayedTodos}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <Todo
-              todo={item}
-              isTodoExpired={isExpired(item)}
-              isFuture={isFuture(item)}
-              setShowExtraId={setShowExtraId}
-              showExtraId={showExtraId}
-              getAllTodos={getAllTodos}
-              openEditModal={() => openEditModal(item)}
-            />
-          )}
-          ListEmptyComponent={
-            <Text style={styles.emptyListText}>На сегодня задач нет</Text>
-          } // TODO: добавить кастомный компонент
-          ListFooterComponent={
-            displayedTodos.length > 10 ? (
-              <Pressable style={styles.backToTopButton} onPress={scrollToTop}>
-                <Text style={styles.backToTopButtonText}>
-                  К началу списка ↑
-                </Text>
-              </Pressable>
-            ) : null
-          }
+      {!showAll && (
+        <WeekStrip
+          selectedDate={selectedDate}
+          onSelectDate={selectDate}
+          tasks={allTodos}
         />
-        {bannerSize && (
-          <BannerView
-            size={bannerSize}
-            adRequest={{
-              adUnitId: "R-M-19204363-1",
-            }}
-            style={{ width: "100%", height: 100 }}
-            onAdLoaded={() => console.log("loaded")}
-            onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
+      )}
+
+      <FlatList
+        ref={flatListRef}
+        contentContainerStyle={styles.appScrollableContainer}
+        data={displayedTodos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <Todo
+            todo={item}
+            isTodoExpired={isExpired(item)}
+            isFuture={isFuture(item)}
+            getAllTodos={getAllTodos}
+            openEditModal={() => openEditModal(item)}
           />
         )}
+        ListEmptyComponent={<EmptyState />}
+        ListFooterComponent={
+          displayedTodos.length > 10 ? (
+            <Pressable style={styles.backToTopButton} onPress={scrollToTop}>
+              <Text style={styles.backToTopButtonText}>К началу списка ↑</Text>
+            </Pressable>
+          ) : null
+        }
+      />
 
-        <Modal
-          visible={exitModalVusible}
-          onRequestClose={() => setExitModalVisible(false)}
-          animationType="fade"
-        >
-          <View>
-            <Text>Are you sure you want to exit?</Text>
-          </View>
-          <View>
-            <Button title="close" onPress={() => setExitModalVisible(false)} />
-          </View>
-        </Modal>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowAddModal(true)}
+        activeOpacity={0.8}
+      >
+        <Plus color="white" size={24} strokeWidth={2.5} />
+      </TouchableOpacity>
 
-        <AddTodo
-          showModal={showAddModal}
-          closeModal={onModalClose}
-          onAddTodo={onAddTodo}
-          onUpdateTodo={onUpdateTodo}
-          editData={editData}
-          setEditData={setEditData}
-          currentDate={selectedDate}
+      <AddTodo
+        showModal={showAddModal}
+        closeModal={onModalClose}
+        onAddTodo={onAddTodo}
+        onUpdateTodo={onUpdateTodo}
+        editData={editData}
+        setEditData={setEditData}
+        currentDate={selectedDate}
+      />
+
+      {bannerSize && (
+        <BannerView
+          size={bannerSize}
+          adRequest={{
+            adUnitId: "R-M-19204363-1",
+          }}
+          style={{ width: "100%", height: 100 }}
+          onAdLoaded={() => console.log("loaded")}
+          onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
         />
-      </View>
-    </SafeAreaView>
+      )}
+    </GestureHandlerRootView>
   );
 }
