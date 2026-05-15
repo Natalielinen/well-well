@@ -164,7 +164,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="light" backgroundColor={colors.primary} />
+      <StatusBar style="dark" backgroundColor={colors.primary} />
 
       <Header
         currentDate={selectedDate}
