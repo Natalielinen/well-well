@@ -33,6 +33,7 @@ import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import { Plus } from "lucide-react-native";
 import EmptyState from "./components/EmptyState/EmptyState";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -162,7 +163,7 @@ export default function App() {
   };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor={colors.primary} />
 
       <Header
@@ -234,6 +235,6 @@ export default function App() {
           onAdFailedToLoad={(e) => console.log("error", e.nativeEvent)}
         />
       )}
-    </GestureHandlerRootView>
+    </SafeAreaView>
   );
 }

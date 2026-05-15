@@ -3,7 +3,7 @@ import { radius, spacing } from "../../themes/colors";
 
 export const styles = StyleSheet.create({
   header: {
-    paddingTop: 48,
+    paddingTop: 16,
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
   },
