@@ -37,19 +37,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
-
   const [showAll, setShowAll] = useState(false);
-
   const [editData, setEditData] = useState<TodoItem | null>(null);
+  const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
+  const [prevDateLoading, setPrevDateLoading] = useState(false);
 
   const { width } = Dimensions.get("window");
-
-  const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
 
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);
@@ -57,12 +53,17 @@ export default function App() {
 
   // Date navigation
   const changeDate = useCallback((days: number) => {
+    setPrevDateLoading(true);
     setSelectedDate((prev) => {
       const newDate = new Date(prev);
       newDate.setDate(newDate.getDate() + days);
       return newDate;
     });
     setShowAll(false);
+
+    setTimeout(() => {
+      setPrevDateLoading(false);
+    }, 500);
   }, []);
 
   const selectDate = useCallback((date: Date) => {
@@ -171,7 +172,9 @@ export default function App() {
         onPrevDate={() => changeDate(-1)}
         onNextDate={() => changeDate(1)}
         onShowAll={onFilterChange}
+        onAddTodo={() => setShowAddModal(true)}
         disabledPreviousDates={disabledPreviousDates}
+        prevDateLoading={prevDateLoading}
       />
 
       {!showAll && (
@@ -205,14 +208,6 @@ export default function App() {
           ) : null
         }
       />
-
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setShowAddModal(true)}
-        activeOpacity={0.8}
-      >
-        <Plus color="white" size={24} strokeWidth={2.5} />
-      </TouchableOpacity>
 
       <AddTodo
         showModal={showAddModal}

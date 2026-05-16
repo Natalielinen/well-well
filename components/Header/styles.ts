@@ -13,6 +13,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.md,
   },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
@@ -43,5 +48,10 @@ export const styles = StyleSheet.create({
     color: 'white',
     minWidth: 140,
     textAlign: 'center',
+  },
+  backToTopButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
   },
 });

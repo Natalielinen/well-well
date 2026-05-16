@@ -19,7 +19,7 @@ export default function EmptyState() {
             </View>
             <Text style={styles.title}>На сегодня задач нет</Text>
             <Text style={styles.subtitle}>
-                Нажмите на кнопку ниже, чтобы создать первое дело и начать продуктивный день!
+                Нажмите на кнопку “+”, чтобы создать первое дело и начать продуктивный день!
             </Text>
         </View>
     );
