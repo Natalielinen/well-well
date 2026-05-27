@@ -133,7 +133,7 @@ export default function Todo({
                     ></TouchableOpacity>
 
                     <View style={styles.titleContainer}>
-                        <View>
+                        <View style={styles.titleWrapper}>
                             <Text style={styles.title}>{todo.title}</Text>
                             <View style={styles.badges}>
                                 {isTodoExpired && (

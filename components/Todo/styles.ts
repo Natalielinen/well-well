@@ -44,6 +44,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: '100%',
+  },
+  titleWrapper: {
+    width: '90%',
   },
   title: {
     fontSize: 16,
