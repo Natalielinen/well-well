@@ -10,9 +10,7 @@ import {
   FlatList,
   Pressable,
   Dimensions,
-  TouchableOpacity,
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
@@ -31,9 +29,9 @@ import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 import { colors } from "./themes/colors";
 import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
-import { Plus } from "lucide-react-native";
 import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { setupNotifications } from "./utils/setupNotifications";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -46,6 +44,10 @@ export default function App() {
   const [prevDateLoading, setPrevDateLoading] = useState(false);
 
   const { width } = Dimensions.get("window");
+
+  useEffect(() => {
+    setupNotifications();
+  }, []);
 
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);

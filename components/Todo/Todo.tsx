@@ -2,7 +2,7 @@ import { View, Text, Alert, TouchableOpacity } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "./styles";
 import { sizeOptions, sizes } from "../../constants/todo";
-import { addDays, format } from "date-fns";
+import { addDays, format, formatDate } from "date-fns";
 import { ru } from "date-fns/locale";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
 import { colors } from "../../themes/colors";
@@ -12,6 +12,7 @@ import {
     Trash2,
     Pen,
     FileExclamationPoint,
+    Bell,
 } from "lucide-react-native";
 
 type TodoProps = {
@@ -183,6 +184,21 @@ export default function Todo({
                                         }{" "}
                                     </Text>
                                 </View>
+                                {
+                                    todo.reminderDate && <View
+                                        style={[
+                                            styles.badge,
+                                            { backgroundColor: colors.warningLight },
+                                        ]}
+                                    >
+                                        <Bell size={12} color="#92400e" />
+                                        <Text style={[styles.badgeText, { color: "#92400e" }]}>
+                                            {
+                                                formatDate(new Date(todo.reminderDate), "hh:mm")
+                                            }
+                                        </Text>
+                                    </View>
+                                }
                             </View>
                         </View>
 
