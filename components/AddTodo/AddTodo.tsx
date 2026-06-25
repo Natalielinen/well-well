@@ -52,9 +52,17 @@ export default function AddTodo({
     const [showDatepicker, setShowDatepicker] = useState(false);
 
     const [showRemindField, setShowRemindField] = useState(false);
-    const [remindDate, setRemindDate] = useState<Date>(new Date());
+    const [remindDate, setRemindDate] = useState<Date | null>(null);
     const [showRemindDatepicker, setShowRemindDatepicker] = useState(false);
     const [showRemindTimePicker, setShowRemindTimePicker] = useState(false);
+
+    useEffect(() => {
+        if (showRemindField) {
+            setRemindDate(new Date());
+        } else {
+            setRemindDate(null);
+        }
+    }, [showRemindField]);
 
     useEffect(() => {
         if (currentDate) {
@@ -70,6 +78,10 @@ export default function AddTodo({
             setRepeatFrequency(editData.repeatFrequency.toString());
             setSize(editData.size);
             setNextDate(new Date(editData.nextDate));
+            setRemindDate(
+                editData.reminderDate ? new Date(editData.reminderDate) : null,
+            );
+            setShowRemindField(!!editData.reminderDate);
         }
     }, [editData]);
 
@@ -105,7 +117,7 @@ export default function AddTodo({
 
         if (!selectedDate) return;
 
-        const updated = new Date(remindDate);
+        const updated = new Date();
         updated.setFullYear(selectedDate.getFullYear());
         updated.setMonth(selectedDate.getMonth());
         updated.setDate(selectedDate.getDate());
@@ -120,7 +132,7 @@ export default function AddTodo({
 
         if (!selectedTime) return;
 
-        const updated = new Date(remindDate);
+        const updated = new Date();
         updated.setHours(selectedTime.getHours());
         updated.setMinutes(selectedTime.getMinutes());
 
@@ -172,11 +184,9 @@ export default function AddTodo({
             repeatFrequency: Number(repeatFrequency),
             nextDate: format(nextDate, "yyyy-MM-dd"),
             size,
-            reminderDate: remindDate
-                ? remindDate.toISOString()
-                : "",
+            reminderDate: remindDate ? remindDate.toISOString() : "",
 
-            notificationId: editData?.notificationId ?? "",
+            notificationId: "",
         };
 
         // =========================
@@ -188,11 +198,7 @@ export default function AddTodo({
                 await cancelReminder(editData.notificationId);
             }
 
-            const notificationId = await scheduleReminder(
-                id,
-                title,
-                remindDate
-            );
+            const notificationId = await scheduleReminder(id, title, remindDate);
 
             newTask.notificationId = notificationId;
             newTask.reminderDate = remindDate.toISOString();
@@ -228,7 +234,9 @@ export default function AddTodo({
             <ScrollView>
                 <View style={styles.container}>
                     <View style={styles.handle} />
-                    <Text style={styles.title}>Добавить дело</Text>
+                    <Text style={styles.title}>
+                        {editData ? "Редактировать дело" : "Добавить дело"}
+                    </Text>
 
                     <View style={styles.form}>
                         <View style={styles.inputGroup}>
@@ -339,59 +347,58 @@ export default function AddTodo({
                                 <Switch
                                     value={showRemindField}
                                     onValueChange={setShowRemindField}
-                                    trackColor={{ false: colors.border, true: colors.primaryLight }}
+                                    trackColor={{
+                                        false: colors.border,
+                                        true: colors.primaryLight,
+                                    }}
                                     thumbColor={showRemindField ? colors.primary : "#ffffff"}
                                     ios_backgroundColor={colors.border}
                                 />
                             </View>
 
-                            {
-                                showRemindField && (
-                                    <View>
-                                        <TouchableOpacity
-                                            style={styles.dateButton}
-                                            onPress={() => setShowRemindDatepicker(true)}
-                                        >
-                                            <Text style={styles.dateText}>
-                                                {
-                                                    remindDate.toLocaleString("ru-RU", {
-                                                        day: "numeric",
-                                                        month: "short",
-                                                        year: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    })
-                                                }
-                                            </Text>
-                                        </TouchableOpacity>
-                                        {showRemindDatepicker && (
-                                            <DateTimePicker
-                                                value={remindDate}
-                                                mode="date"
-                                                display="default"
-                                                onChange={onRemindDateChange}
-                                                minimumDate={nextDate}
-                                            />
-                                        )}
-                                        {showRemindTimePicker && (
-                                            <DateTimePicker
-                                                value={remindDate}
-                                                mode="time"
-                                                display="default"
-                                                onChange={onRemindTimeChange}
-                                            />
-                                        )}
-                                    </View>
-
-                                )
-                            }
-
-
+                            {showRemindField && (
+                                <View>
+                                    <TouchableOpacity
+                                        style={styles.dateButton}
+                                        onPress={() => setShowRemindDatepicker(true)}
+                                    >
+                                        <Text style={styles.dateText}>
+                                            {remindDate?.toLocaleString("ru-RU", {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {showRemindDatepicker && (
+                                        <DateTimePicker
+                                            value={remindDate!}
+                                            mode="date"
+                                            display="default"
+                                            onChange={onRemindDateChange}
+                                            minimumDate={nextDate}
+                                        />
+                                    )}
+                                    {showRemindTimePicker && (
+                                        <DateTimePicker
+                                            value={remindDate!}
+                                            mode="time"
+                                            display="default"
+                                            onChange={onRemindTimeChange}
+                                        />
+                                    )}
+                                </View>
+                            )}
                         </View>
                     </View>
 
                     <View style={styles.actions}>
-                        <TouchableOpacity style={styles.btnSecondary} onPress={onModalClose}>
+                        <TouchableOpacity
+                            style={styles.btnSecondary}
+                            onPress={onModalClose}
+                        >
                             <Text style={styles.btnSecondaryText}>Закрыть</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -407,7 +414,6 @@ export default function AddTodo({
                     </View>
                 </View>
             </ScrollView>
-
         </Modal>
     );
 }
