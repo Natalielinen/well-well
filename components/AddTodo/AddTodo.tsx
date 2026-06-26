@@ -15,8 +15,6 @@ import { sizeOptions } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
 import { format, isBefore, startOfDay } from "date-fns";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { scheduleReminder } from "../../utils/scheduleReminder";
-import { cancelReminder } from "../../utils/cancelReminder";
 
 type AddTodoProps = {
     showModal: boolean;
@@ -91,7 +89,9 @@ export default function AddTodo({
         setIsRepeat(false);
         setRepeatFrequency("");
         setSize(sizeOptions[0].value);
-        setNextDate(new Date());
+        setNextDate(currentDate ?? new Date());
+        setRemindDate(null);
+        setShowRemindField(false);
     };
 
     const clearErrors = () => {
@@ -114,38 +114,35 @@ export default function AddTodo({
 
     const onRemindDateChange = (event: any, selectedDate?: Date) => {
         setShowRemindDatepicker(false);
-
         if (!selectedDate) return;
 
-        const updated = new Date();
+        // Берём текущий remindDate (или new Date()) как основу
+        const updated = remindDate ? new Date(remindDate) : new Date();
         updated.setFullYear(selectedDate.getFullYear());
         updated.setMonth(selectedDate.getMonth());
         updated.setDate(selectedDate.getDate());
 
         setRemindDate(updated);
-
         setShowRemindTimePicker(true);
     };
 
     const onRemindTimeChange = (event: any, selectedTime?: Date) => {
         setShowRemindTimePicker(false);
-
         if (!selectedTime) return;
 
-        const updated = new Date();
+        // Берём уже сохранённую дату и добавляем время
+        const updated = remindDate ? new Date(remindDate) : new Date();
         updated.setHours(selectedTime.getHours());
         updated.setMinutes(selectedTime.getMinutes());
+        updated.setSeconds(0);
 
         setRemindDate(updated);
     };
-
     const onModalClose = () => {
         clearFields();
         closeModal();
         clearErrors();
         setEditData(null);
-        setRemindDate(new Date());
-        setShowRemindField(false);
     };
 
     const onCreate = async () => {
@@ -173,6 +170,11 @@ export default function AddTodo({
             return;
         }
 
+        if (showRemindField && remindDate && isBefore(remindDate, new Date())) {
+            setError({ ...error, minDate: "Время напоминания не может быть в прошлом" });
+            return;
+        }
+
         const id = editData ? editData.id : Date.now();
 
         const newTask: TodoItem = {
@@ -184,33 +186,9 @@ export default function AddTodo({
             repeatFrequency: Number(repeatFrequency),
             nextDate: format(nextDate, "yyyy-MM-dd"),
             size,
-            reminderDate: remindDate ? remindDate.toISOString() : "",
-
-            notificationId: "",
+            reminderDate: remindDate ? remindDate.toISOString() : undefined,
+            notificationId: editData?.notificationId ?? undefined,
         };
-
-        // =========================
-        // 🔔 CREATE / UPDATE REMINDER
-        // =========================
-        if (remindDate) {
-            // если это редактирование → сначала удалить старое уведомление
-            if (editData?.notificationId) {
-                await cancelReminder(editData.notificationId);
-            }
-
-            const notificationId = await scheduleReminder(id, title, remindDate);
-
-            newTask.notificationId = notificationId;
-            newTask.reminderDate = remindDate.toISOString();
-        } else {
-            // если пользователь убрал напоминание при редактировании
-            if (editData?.notificationId) {
-                await cancelReminder(editData.notificationId);
-            }
-
-            newTask.notificationId = "";
-            newTask.reminderDate = "";
-        }
 
         // =========================
         // 💾 SAVE

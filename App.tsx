@@ -31,7 +31,7 @@ import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { setupNotifications } from "./utils/setupNotifications";
+import { useNotifications } from "./hooks/useNotifications";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -43,11 +43,9 @@ export default function App() {
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
   const [prevDateLoading, setPrevDateLoading] = useState(false);
 
-  const { width } = Dimensions.get("window");
+  const { scheduleNotification, cancelNotification } = useNotifications();
 
-  useEffect(() => {
-    setupNotifications();
-  }, []);
+  const { width } = Dimensions.get("window");
 
   useEffect(() => {
     BannerAdSize.stickySize(width).then(setBannerSize);
@@ -140,14 +138,48 @@ export default function App() {
   );
 
   const onAddTodo = async (newTask: TodoItem) => {
-    await addTodo(newTask);
+    let taskToSave = { ...newTask };
 
-    setAllTodos((prev) => [newTask, ...prev]);
+    if (newTask.reminderDate) {
+      const reminderDate = new Date(newTask.reminderDate);
+
+      const notificationId = await scheduleNotification(
+        newTask.title,
+        newTask.description || "Напоминание о задаче",
+        reminderDate,
+      );
+      taskToSave.notificationId = notificationId;
+    }
+
+    await addTodo(taskToSave);
+    setAllTodos((prev) => [taskToSave, ...prev]);
   };
 
   const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
-    await updateTodo(id, updatedTodo);
+    // Находим старую задачу чтобы отменить её уведомление
+    const oldTodo = allTodos.find((t) => t.id === id);
 
+    // Отменяем старое уведомление если было
+    if (oldTodo?.notificationId) {
+      await cancelNotification(oldTodo.notificationId);
+    }
+
+    let taskToSave: TodoItem = { ...updatedTodo, notificationId: undefined };
+
+    // Создаём новое если нужно
+    if (updatedTodo.reminderDate) {
+      const notificationId = await scheduleNotification(
+        updatedTodo.title,
+        updatedTodo.description || "Напоминание о задаче",
+        new Date(updatedTodo.reminderDate),
+      );
+
+      if (notificationId) {
+        taskToSave.notificationId = notificationId;
+      }
+    }
+
+    await updateTodo(id, taskToSave);
     getAllTodos();
   };
 

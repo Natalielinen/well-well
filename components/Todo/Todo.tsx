@@ -14,6 +14,7 @@ import {
     FileExclamationPoint,
     Bell,
 } from "lucide-react-native";
+import { useNotifications } from "../../hooks/useNotifications";
 
 type TodoProps = {
     todo: TodoItem;
@@ -29,7 +30,11 @@ export default function Todo({
     getAllTodos,
     openEditModal,
 }: TodoProps) {
+    const { cancelNotification } = useNotifications();
     const onTaskDelete = async () => {
+        if (todo.notificationId) {
+            await cancelNotification(todo.notificationId);
+        }
         await removeTodo(todo.id);
         getAllTodos();
     };
