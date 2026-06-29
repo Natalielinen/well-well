@@ -116,16 +116,16 @@ export default function Todo({
                 todo.repeatFrequency,
             );
 
-            const reminderTime = format(new Date(todo.reminderDate!), 'HH:mm');
+            // const reminderTime = format(new Date(todo.reminderDate!), 'HH:mm');
 
-            const finalDateTime = new Date(newNextDate);
-            finalDateTime.setHours(Number(reminderTime.split(':')[0]));
-            finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
+            // const finalDateTime = new Date(newNextDate);
+            // finalDateTime.setHours(Number(reminderTime.split(':')[0]));
+            // finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
             await updateTodo(todo.id, {
                 ...todo,
                 lastUpdated: format(new Date(), "yyyy-MM-dd"),
                 nextDate: format(newNextDate, "yyyy-MM-dd"),
-                reminderDate: todo.reminderDate ? format(finalDateTime, 'yyyy-MM-dd HH:mm') : undefined,
+                // reminderDate: todo.reminderDate ? format(finalDateTime, 'yyyy-MM-dd HH:mm') : undefined,
             });
             showAlert(
                 "Успешно",
