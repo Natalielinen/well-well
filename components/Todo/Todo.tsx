@@ -61,6 +61,7 @@ export default function Todo({
                         await updateTodo(todo.id, {
                             ...todo,
                             lastUpdated: format(new Date(), "yyyy-MM-dd"),
+                            // добавить изменение напоминалки, если она есть
                             nextDate: format(
                                 addDays(new Date(), todo.repeatFrequency),
                                 "yyyy-MM-dd",
@@ -114,10 +115,17 @@ export default function Todo({
                 new Date(todo.nextDate),
                 todo.repeatFrequency,
             );
+
+            const reminderTime = format(new Date(todo.reminderDate!), 'HH:mm');
+
+            const finalDateTime = new Date(newNextDate);
+            finalDateTime.setHours(Number(reminderTime.split(':')[0]));
+            finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
             await updateTodo(todo.id, {
                 ...todo,
                 lastUpdated: format(new Date(), "yyyy-MM-dd"),
                 nextDate: format(newNextDate, "yyyy-MM-dd"),
+                reminderDate: todo.reminderDate ? format(finalDateTime, 'yyyy-MM-dd HH:mm') : undefined,
             });
             showAlert(
                 "Успешно",
@@ -199,7 +207,7 @@ export default function Todo({
                                         <Bell size={12} color="#92400e" />
                                         <Text style={[styles.badgeText, { color: "#92400e" }]}>
                                             {
-                                                formatDate(new Date(todo.reminderDate), "hh:mm")
+                                                formatDate(new Date(todo.reminderDate), "HH:mm")
                                             }
                                         </Text>
                                     </View>
@@ -241,3 +249,11 @@ export default function Todo({
         </View>
     );
 }
+function setMinutes(arg0: any, arg1: any) {
+    throw new Error("Function not implemented.");
+}
+
+function setHours(newNextDate: Date, arg1: any): any {
+    throw new Error("Function not implemented.");
+}
+

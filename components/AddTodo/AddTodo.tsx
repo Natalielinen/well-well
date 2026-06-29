@@ -55,11 +55,14 @@ export default function AddTodo({
     const [showRemindTimePicker, setShowRemindTimePicker] = useState(false);
 
     useEffect(() => {
-        if (showRemindField) {
-            setRemindDate(new Date());
-        } else {
-            setRemindDate(null);
+        if (!editData) {
+            if (showRemindField) {
+                setRemindDate(new Date());
+            } else {
+                setRemindDate(null);
+            }
         }
+
     }, [showRemindField]);
 
     useEffect(() => {
