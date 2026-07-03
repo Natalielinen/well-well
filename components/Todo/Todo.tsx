@@ -30,7 +30,32 @@ export default function Todo({
     getAllTodos,
     openEditModal,
 }: TodoProps) {
-    const { cancelNotification } = useNotifications();
+    const { cancelNotification, scheduleNotification } = useNotifications();
+
+    const getUpdatedTime = (nextDate: Date | string, reminderTime: string) => {
+        const finalDateTime = new Date(nextDate);
+        finalDateTime.setHours(Number(reminderTime.split(':')[0]));
+        finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
+
+        return finalDateTime;
+    }
+
+    const handleCompleteTask = async (lastUpdated: string, nextDate: string, reminderDate?: string) => {
+        let notificationId;
+        if (reminderDate && todo.notificationId) {
+            await cancelNotification(todo.notificationId);
+            notificationId = await scheduleNotification(todo.title, todo.description || "Напоминание о задаче", new Date(reminderDate));
+        }
+        await updateTodo(todo.id, {
+            ...todo,
+            lastUpdated,
+            nextDate,
+            reminderDate,
+            ...(notificationId && { notificationId }),
+        });
+
+    }
+
     const onTaskDelete = async () => {
         if (todo.notificationId) {
             await cancelNotification(todo.notificationId);
@@ -58,30 +83,36 @@ export default function Todo({
                 {
                     text: "Сегодня",
                     onPress: async () => {
-                        await updateTodo(todo.id, {
-                            ...todo,
-                            lastUpdated: format(new Date(), "yyyy-MM-dd"),
-                            // добавить изменение напоминалки, если она есть
-                            nextDate: format(
-                                addDays(new Date(), todo.repeatFrequency),
-                                "yyyy-MM-dd",
-                            ),
-                        });
-                        getAllTodos();
+                        const newNextDate = format(
+                            addDays(new Date(), todo.repeatFrequency),
+                            "yyyy-MM-dd",
+                        );
+                        const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
+
+                        await handleCompleteTask(
+                            format(new Date(), "yyyy-MM-dd"),
+                            newNextDate,
+                            todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+                        )
+
+                        await getAllTodos();
                     },
                 },
                 {
                     text: "Дата в задаче",
                     onPress: async () => {
-                        await updateTodo(todo.id, {
-                            ...todo,
-                            lastUpdated: format(new Date(), "yyyy-MM-dd"),
-                            nextDate: format(
-                                addDays(new Date(todo.nextDate), todo.repeatFrequency),
-                                "yyyy-MM-dd",
-                            ),
-                        });
-                        getAllTodos();
+                        const newNextDate = format(
+                            addDays(new Date(todo.nextDate), todo.repeatFrequency),
+                            "yyyy-MM-dd",
+                        );
+                        const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
+                        console.log("Дата в задаче reminderTime", reminderTime);
+                        await handleCompleteTask(
+                            format(new Date(), "yyyy-MM-dd"),
+                            newNextDate,
+                            todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+                        );
+                        await getAllTodos();
                     },
                 },
             ],
@@ -108,25 +139,23 @@ export default function Todo({
                 "Успешно",
                 "Выполнена не повторяющаяся задача. Задача удалена из списка дел",
             );
+            // Повторяющаяся задача, дата не наступила
         } else if (todo.isRepeat && isFuture) {
             showAlertForExpiredTask(true);
+            // Повторяющаяся не просроченная задача
         } else if (todo.isRepeat && !isTodoExpired) {
             const newNextDate = addDays(
                 new Date(todo.nextDate),
                 todo.repeatFrequency,
             );
 
-            // const reminderTime = format(new Date(todo.reminderDate!), 'HH:mm');
+            const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
 
-            // const finalDateTime = new Date(newNextDate);
-            // finalDateTime.setHours(Number(reminderTime.split(':')[0]));
-            // finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
-            await updateTodo(todo.id, {
-                ...todo,
-                lastUpdated: format(new Date(), "yyyy-MM-dd"),
-                nextDate: format(newNextDate, "yyyy-MM-dd"),
-                // reminderDate: todo.reminderDate ? format(finalDateTime, 'yyyy-MM-dd HH:mm') : undefined,
-            });
+            await handleCompleteTask(
+                format(new Date(), "yyyy-MM-dd"),
+                format(newNextDate, "yyyy-MM-dd"),
+                todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+            )
             showAlert(
                 "Успешно",
                 `Выполнена повторяющаяся задача. Дата следующего выполнения: ${format(newNextDate, "d LLL yyyy", { locale: ru })}`,
@@ -248,12 +277,5 @@ export default function Todo({
             </View>
         </View>
     );
-}
-function setMinutes(arg0: any, arg1: any) {
-    throw new Error("Function not implemented.");
-}
-
-function setHours(newNextDate: Date, arg1: any): any {
-    throw new Error("Function not implemented.");
 }
 
