@@ -106,7 +106,6 @@ export default function Todo({
                             "yyyy-MM-dd",
                         );
                         const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
-                        console.log("Дата в задаче reminderTime", reminderTime);
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,

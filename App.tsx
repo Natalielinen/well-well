@@ -117,7 +117,6 @@ export default function App() {
 
     setAllTodos(storedTodos);
 
-    // console.log("Все задачи:", storedTodos);
   };
 
   // Загружаем все задачи из хранилища при старте
