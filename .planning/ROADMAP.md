@@ -4,7 +4,7 @@
 
 | Phase | Name | Plans | Requirements | Status |
 |-------|------|-------|--------------|--------|
-| 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | ○ |
+| 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | ○ |
 | 3 | Refactoring | 2 | REF-01, REF-02, REF-03 | ○ |
 | 4 | Testing | 2 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
@@ -91,11 +91,15 @@ Success criteria:
 **Goal:** [To be planned]
 **Requirements**: TBD
 **Depends on:** Phase 0
-**Plans:** 0 plans
+**Plans:** 5/5 plans executed
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 1 to break down)
+- [x] 01-PLAN.md
+- [x] 02-PLAN.md
+- [x] 03-PLAN.md
+- [x] 04-PLAN.md
+- [x] 05-PLAN.md
 
 ### Phase 2: 2 Fix known bugs
 
