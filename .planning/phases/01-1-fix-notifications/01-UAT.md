@@ -1,9 +1,9 @@
 ---
-status: testing
+status: diagnosed
 phase: 01-1-fix-notifications
 source: ["01-VERIFICATION.md"]
 started: 2026-07-16T10:30:00+03:00
-updated: 2026-07-16T11:48:00+03:00
+updated: 2026-07-16T11:55:00+03:00
 ---
 
 ## Current Test
@@ -68,6 +68,18 @@ blocked: 0
   reason: "User reported: не совпадает, задача создалась с уведомлением в прошлом"
   severity: major
   test: 1
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "В scheduleNotification (useNotifications.ts:25-27) перенос на Date.now() + 60000 применяется только к локальной переменной date, которая используется для триггера OS-уведомления. Функция возвращает только notification id и не возвращает скорректированную дату. В App.tsx:145-160 onAddTodo сохраняет taskToSave с исходным прошедшим reminderDate, поэтому в хранилище и UI (Todo.tsx:223-232) продолжает отображаться прошедшая дата."
+  artifacts:
+    - path: "hooks/useNotifications.ts"
+      issue: "scheduleNotification переносит дату только локально (lines 25-27) и не возвращает её; notificationId возвращается без adjusted date"
+    - path: "App.tsx"
+      issue: "onAddTodo/onUpdateTodo сохраняют исходный прошедший reminderDate в taskToSave, игнорируя скорректированную дату"
+    - path: "components/Todo/Todo.tsx"
+      issue: "Рендерит todo.reminderDate напрямую (lines 223-232), поэтому пользователь видит прошедшую дату"
+    - path: "components/AddTodo/AddTodo.tsx"
+      issue: "Записывает сырую прошедшую remindDate в форму (line 187) без нормализации"
+  missing:
+    - "Сделать нормализацию 'past → now+60s' авторитетной и сохранять скорректированную дату в taskToSave.reminderDate в App.tsx"
+    - "Вернуть adjusted date из scheduleNotification или вычислить её в shared helper и записывать обратно в хранилище"
+    - "Обновить rescheduleNextNotification в useNotifications.ts, чтобы он тоже сохранял скорректированную дату"
+  debug_session: ".planning/debug/notification-not-rescheduled.md"
