@@ -15,6 +15,7 @@ import {
     Bell,
 } from "lucide-react-native";
 import { useNotifications } from "../../hooks/useNotifications";
+import { rescheduleNextNotification } from "../../hooks/useNotifications";
 
 type TodoProps = {
     todo: TodoItem;
@@ -41,19 +42,12 @@ export default function Todo({
     }
 
     const handleCompleteTask = async (lastUpdated: string, nextDate: string, reminderDate?: string) => {
-        let notificationId;
-        if (reminderDate && todo.notificationId) {
-            await cancelNotification(todo.notificationId);
-            notificationId = await scheduleNotification(todo.title, todo.description || "Напоминание о задаче", new Date(reminderDate));
-        }
+        const updatedTodo = { ...todo, lastUpdated, nextDate, reminderDate };
+        const notificationId = await rescheduleNextNotification(updatedTodo);
         await updateTodo(todo.id, {
-            ...todo,
-            lastUpdated,
-            nextDate,
-            reminderDate,
+            ...updatedTodo,
             ...(notificationId && { notificationId }),
         });
-
     }
 
     const onTaskDelete = async () => {

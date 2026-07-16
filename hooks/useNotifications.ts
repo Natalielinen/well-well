@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
+import { addDays } from "date-fns";
+import { TodoItem } from "../types/todo";
 
 // Как показывать уведомление когда приложение открыто
 Notifications.setNotificationHandler({
@@ -9,10 +11,69 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
-    shouldShowBanner: true, // показывать баннер сверху
-    shouldShowList: true, // показывать в центре уведомлений
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
+
+export const scheduleNotification = async (
+  title: string,
+  body: string,
+  date: Date,
+): Promise<string | undefined> => {
+  if (date <= new Date()) {
+    date = new Date(Date.now() + 60000);
+  }
+
+  try {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `📋 ${title}`,
+        body,
+        sound: true,
+        data: { date: date.toISOString() },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: date,
+        ...(Platform.OS === "android" && { exact: true }),
+      },
+    });
+
+    return id;
+  } catch (e) {
+    console.error("❌ Ошибка:", e);
+    return undefined;
+  }
+};
+
+export const cancelNotification = async (notificationId: string) => {
+  await Notifications.cancelScheduledNotificationAsync(notificationId);
+};
+
+export const rescheduleNextNotification = async (todo: TodoItem): Promise<string | undefined> => {
+  if (todo.notificationId) {
+    await cancelNotification(todo.notificationId);
+  }
+
+  if (!todo.reminderDate) {
+    return undefined;
+  }
+
+  let nextDate = new Date(todo.reminderDate);
+  if (todo.repeatFrequency && todo.nextDate) {
+    const nextNextDate = addDays(new Date(todo.nextDate), todo.repeatFrequency);
+    nextDate.setFullYear(nextNextDate.getFullYear());
+    nextDate.setMonth(nextNextDate.getMonth());
+    nextDate.setDate(nextNextDate.getDate());
+  }
+
+  if (nextDate <= new Date()) {
+    nextDate = new Date(Date.now() + 60000);
+  }
+
+  return scheduleNotification(todo.title, todo.description || "Напоминание о задаче", nextDate);
+};
 
 export function useNotifications() {
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -22,13 +83,11 @@ export function useNotifications() {
   useEffect(() => {
     requestPermissions();
 
-    // Слушаем входящие уведомления
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("Уведомление получено:", notification);
       });
 
-    // Слушаем нажатие на уведомление
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Пользователь нажал на уведомление:", response);
@@ -60,7 +119,6 @@ export function useNotifications() {
       return;
     }
 
-    // Для Android нужен канал
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("tasks", {
         name: "Задачи",
@@ -73,46 +131,6 @@ export function useNotifications() {
     setPermissionGranted(true);
   };
 
-  // Запланировать уведомление на конкретное время
-const scheduleNotification = async (
-    title: string,
-    body: string,
-    date: Date,
-): Promise<string | undefined> => {
-    
-    if (date <= new Date()) {
-        console.log("📅 Дата в прошлом, переносим уведомление на +1 минуту");
-        date = new Date(Date.now() + 60000);
-    }
-
-    try {
-        const id = await Notifications.scheduleNotificationAsync({
-            content: {
-                title: `📋 ${title}`,
-                body,
-                sound: true,
-                data: { date: date.toISOString() },
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DATE,
-                date: date,
-                ...(Platform.OS === "android" && { exact: true }),
-            },
-        });
-
-        return id;
-    } catch (e) {
-        console.error("❌ Ошибка:", e);
-        return undefined;
-    }
-};
-
-  // Отменить уведомление по id
-  const cancelNotification = async (notificationId: string) => {
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
-  };
-
-  // Отменить все уведомления
   const cancelAllNotifications = async () => {
     await Notifications.cancelAllScheduledNotificationsAsync();
   };
@@ -122,5 +140,6 @@ const scheduleNotification = async (
     scheduleNotification,
     cancelNotification,
     cancelAllNotifications,
+    rescheduleNextNotification,
   };
 }
