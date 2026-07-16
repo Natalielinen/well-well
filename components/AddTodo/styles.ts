@@ -158,4 +158,9 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
   },
+  errorText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: colors.danger,
+  },
 });

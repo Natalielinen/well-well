@@ -370,6 +370,20 @@ export default function AddTodo({
                         </View>
                     </View>
 
+                    {(error.title || error.repeatFrequency || error.minDate) && (
+                        <View style={styles.form}>
+                            {error.title ? (
+                                <Text style={styles.errorText}>{error.title}</Text>
+                            ) : null}
+                            {error.repeatFrequency ? (
+                                <Text style={styles.errorText}>{error.repeatFrequency}</Text>
+                            ) : null}
+                            {error.minDate ? (
+                                <Text style={styles.errorText}>{error.minDate}</Text>
+                            ) : null}
+                        </View>
+                    )}
+
                     <View style={styles.actions}>
                         <TouchableOpacity
                             style={styles.btnSecondary}
