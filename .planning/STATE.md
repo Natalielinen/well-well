@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-07-16T08:31:53.733Z"
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 3
+---
+
 # STATE
 
 ## Project Reference
@@ -5,7 +18,7 @@
 See: `.planning/PROJECT.md` (updated 2026-07-16)
 
 **Core value:** Надёжное выполнение задач с своевременными уведомлениями
-**Current focus:** Phase 1 awaiting human verification
+**Current focus:** Phase 01 — 1-fix-notifications
 
 ## Progress
 

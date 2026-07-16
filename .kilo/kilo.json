@@ -1,0 +1,11 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "read": {
+      "D:/myProjects/Android/wellWell/.kilo/gsd-core/*": "allow"
+    },
+    "external_directory": {
+      "D:/myProjects/Android/wellWell/.kilo/gsd-core/*": "allow"
+    }
+  }
+}

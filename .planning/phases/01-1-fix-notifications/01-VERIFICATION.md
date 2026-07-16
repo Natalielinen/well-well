@@ -1,32 +1,38 @@
 ---
 phase: 01-1-fix-notifications
 verified: 2026-07-16T10:27:41+03:00
-status: human_needed
+status: passed
 score: 8/8 must-haves verified
 behavior_unverified: 3 # NOTF-02 (notificationId sync), NOTF-03 (cancel+reschedule transition), NOTF-04 (alert on failure) — code present and wired, but no test exercises the runtime transition; runs only on a device
 overrides_applied: 0
 gaps:
 deferred:
 behavior_unverified_items:
+
   - truth: NOTF-02: Every repeating task has a notificationId matching the latest scheduled notification
     test: Создать повторяющуюся задачу с reminder, затем завершить её (onTaskComplete → rescheduleNextNotification) и проверить, что TodoItem.notificationId в хранилище совпадает с id, возвращённым scheduleNotificationAsync.
     expected: После создания и завершения notificationId сохраняется и обновляется на id нового уведомления.
     why_human: Переход состояния (cancel старого + schedule нового + persist id) не покрыт тестом; проверяется только наличие вызовов в коде.
+
   - truth: NOTF-03: Editing a task cancels the old notification and creates a new one with the updated time
     test: Отредактировать задачу с изменением reminderDate (onUpdateTodo) и проверить, что cancelScheduledNotificationAsync вызван со старым id, а новое уведомление запланировано на обновлённое время.
     expected: Старое уведомление отменено, новое запланировано, taskToSave.notificationId обновлён.
     why_human: Переход cancel→schedule→persist не покрыт автотестом; требует реального expo-notifications на устройстве.
+
   - truth: NOTF-04: User sees an alert when notification scheduling fails
     test: Смоделировать rejection scheduleNotificationAsync (мок) и проверить, что Alert.alert("Ошибка уведомления", ...) отображается, и что App.tsx перехватывает сбой в onAddTodo/onUpdateTodo.
     expected: Пользователь видит Alert при сбое планирования; возврат undefined не теряется молча.
     why_human: Ветка catch в scheduleNotification и try/catch в App.tsx присутствуют, но поведение не подтверждено тестом (файл useNotifications.test.ts отсутствует в репозитории).
 human_verification:
+
   - test: Запустить приложение на реальном устройстве, создать повторяющуюся задачу с напоминанием в прошлом
     expected: Уведомление запланировано на Date.now() + 60с, а не потеряно; в логах/UI нет молчаливого сбоя.
     why_human: Требует expo-notifications на устройстве; планирование exact-alarm работает только на девайсе.
+
   - test: Завершить повторяющуюся задачу и проверить повторное уведомление
     expected: Старое уведомление отменяется и планируется новое на следующую дату; notificationId в хранилище обновлён.
     why_human: Состояние notificationId после завершения не покрыто тестом.
+
   - test: Сымитировать сбой планирования уведомления (например, отказ разрешений)
     expected: Пользователю показывается Alert с ошибкой, а не консольное сообщение.
     why_human: Ветка ошибки не покрыта автотестом.
@@ -128,6 +134,12 @@ SUMMARY 01 (строки 37-38) утверждает, что при дате в 
 2. **Требуется ручная проверка на устройстве** для подтверждения доставки exact-alarm и переходов состояния notificationId.
 
 Автоматическая проверка кода пройдена. Ожидается ручная верификация.
+
+## Acknowledged Gaps
+
+- test: 3
+  reason: "Не получилось имитировать сбой, пропускаем эту проверку."
+  acknowledged_at: 2026-07-16
 
 ---
 

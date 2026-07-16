@@ -2,7 +2,7 @@
 phase: "01"
 plan: "04"
 type: execute
-wave: 4
+wave: 1
 depends_on: []
 gap_closure: true
 gap_ids: [G-1-1]
@@ -59,7 +59,7 @@ Output: Изменённый файл `components/AddTodo/AddTodo.tsx` без б
     НЕ изменять hooks/useNotifications.ts: логика переноса даты date = new Date(Date.now() + 60000) на строках 25-27 должна остаться и стать достижимой из onCreate через вызов планирования уведомления в родительском компоненте (App.tsx), который использует scheduleNotification.
   </action>
   <verify>
-    <automated>npx tsc --noEmit 2>&1 | findstr /i "AddTodo" || echo OK_NO_ADDTODO_ERRORS</automated>
+    <automated>npx tsc --noEmit 2>&1 | findstr /i "AddTodo" >nul && (echo ERROR: TypeScript errors in AddTodo && exit /b 1); echo OK_NO_ADDTODO_ERRORS</automated>
   </verify>
   <done>Блока early return по isBefore(remindDate, new Date()) в onCreate больше нет; сборка TypeScript проходит без ошибок в AddTodo.</done>
 </task>
@@ -71,7 +71,7 @@ Output: Изменённый файл `components/AddTodo/AddTodo.tsx` без б
     Не создавать новых ранних выходов по remindDate. Если в themes/styles.ts отсутствует errorText, добавить минимальное определение (цвет из colors.error или colors.textError красный, размер шрифта меньше label).
   </action>
   <verify>
-    <automated>npx tsc --noEmit 2>&1 | findstr /i "AddTodo" || echo OK_NO_ADDTODO_ERRORS</automated>
+    <automated>npx tsc --noEmit 2>&1 | findstr /i "AddTodo" >nul && (echo ERROR: TypeScript errors in AddTodo && exit /b 1); echo OK_NO_ADDTODO_ERRORS</automated>
   </verify>
   <done>В JSX присутствует вывод error.title/error.repeatFrequency/error.minDate; сборка TypeScript проходит без ошибок. Проверить grep: в файле AddTodo.tsx есть обращение к error.minDate/error.title/error.repeatFrequency в JSX-части (не только в setState).</done>
 </task>
