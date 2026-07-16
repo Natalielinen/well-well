@@ -130,3 +130,12 @@ None - no external service configuration required.
 ---
 *Phase: 01-1-fix-notifications*
 *Completed: 2026-07-16*
+
+## Self-Check: PASSED
+
+- Файлы существуют: `components/AddTodo/AddTodo.tsx` ✓, `components/AddTodo/styles.ts` ✓, `04-SUMMARY.md` ✓
+- Коммиты присутствуют: `80e0dfd` ✓, `bb0e547` ✓, `bb15bef` ✓
+- `isBefore(remindDate, new Date())` отсутствует в onCreate ✓
+- `npx tsc --noEmit` без ошибок в AddTodo ✓
+- Ошибки валидации отображаются в JSX (AddTodo.tsx:373-382) ✓
+- Логика переноса даты в useNotifications.ts сохранена ✓
