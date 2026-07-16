@@ -1,18 +1,22 @@
 ---
-status: diagnosed
+status: testing
 phase: 01-1-fix-notifications
 source: ["01-VERIFICATION.md"]
 started: 2026-07-16T10:30:00+03:00
-updated: 2026-07-16T11:55:00+03:00
+updated: 2026-07-16T12:05:00+03:00
 ---
 
 ## Current Test
 
-[testing complete]
+number: 1
+name: Повторяющаяся задача с reminder в прошлом доставляет уведомление
+expected: |
+  Уведомление запланировано на Date.now() + 60с, а не потеряно; в логах/UI нет молчаливого сбоя.
+awaiting: user response
 
 ## Tests
 
-### 1. Повторяющаяся задача с reminder в прошлом доставляет уведомление
+### 1. Повторяющаящаяся задача с reminder в прошлом доставляет уведомление
 
 expected: Уведомление запланировано на Date.now() + 60с, а не потеряно; в логах/UI нет молчаливого сбоя.
 result: issue
