@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 01-1-fix-notifications
 source: ["01-VERIFICATION.md"]
 started: 2026-07-16T10:30:00+03:00
-updated: 2026-07-16T11:08:06+03:00
+updated: 2026-07-16T11:40:00+03:00
 ---
 
 ## Current Test
@@ -43,7 +43,9 @@ blocked: 0
 
 - gap_id: G-1-1
   truth: "При создании задачи с reminder в прошлом уведомление должно быть перенесено на Date.now() + 60с, задача сохраняется и модал закрывается"
-  status: failed
+  status: resolved
+  resolved_by: 04-PLAN.md
+  resolved_at: 2026-07-16
   reason: "User reported: При создании задачи с уведомлением в прошлом, кнопка сохранить активна, но при нажатии ничего не происходит. Задача не сохраняется, окно создания не закрывается, сообщений в UI об ошибке нет."
   severity: major
   test: 1
