@@ -81,8 +81,8 @@ const scheduleNotification = async (
 ): Promise<string | undefined> => {
     
     if (date <= new Date()) {
-        console.log("❌ Дата в прошлом, уведомление не создано");
-        return undefined;
+        console.log("📅 Дата в прошлом, переносим уведомление на +1 минуту");
+        date = new Date(Date.now() + 60000);
     }
 
     try {
