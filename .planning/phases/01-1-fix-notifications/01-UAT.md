@@ -1,9 +1,9 @@
 ---
-status: complete
+status: testing
 phase: 01-1-fix-notifications
 source: ["01-VERIFICATION.md"]
 started: 2026-07-16T10:30:00+03:00
-updated: 2026-07-16T11:40:00+03:00
+updated: 2026-07-16T11:48:00+03:00
 ---
 
 ## Current Test
@@ -16,7 +16,7 @@ updated: 2026-07-16T11:40:00+03:00
 
 expected: Уведомление запланировано на Date.now() + 60с, а не потеряно; в логах/UI нет молчаливого сбоя.
 result: issue
-reported: "При создании задачи с уведомлением в прошлом, кнопка сохранить активна, но при нажатии ничего не происходит. Задача не сохраняется, окно создания не закрывается, сообщений в UI об ошибке нет."
+reported: "не совпадает, задача создалась с уведомлением в прошлом"
 severity: major
 
 ### 2. Завершить повторяющуюся задачу и проверить повторное уведомление
@@ -61,3 +61,13 @@ blocked: 0
     - "Удалить или заменить на soft-warning блокирующую валидацию isBefore в onCreate (AddTodo.tsx:176-179)"
     - "Опционально: отображать error.minDate/error.title/error.repeatFrequency в JSX, если валидация нужна для других случаев"
   debug_session: ".planning/debug/past-reminder-notification-fails.md"
+
+- gap_id: G-1-4
+  truth: "При создании задачи с reminder в прошлом уведомление должно быть перенесено на Date.now() + 60с"
+  status: failed
+  reason: "User reported: не совпадает, задача создалась с уведомлением в прошлом"
+  severity: major
+  test: 1
+  root_cause: ""
+  artifacts: []
+  missing: []
