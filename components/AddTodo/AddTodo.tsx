@@ -173,11 +173,6 @@ export default function AddTodo({
             return;
         }
 
-        if (showRemindField && remindDate && isBefore(remindDate, new Date())) {
-            setError({ ...error, minDate: "Время напоминания не может быть в прошлом" });
-            return;
-        }
-
         const id = editData ? editData.id : Date.now();
 
         const newTask: TodoItem = {
