@@ -10,6 +10,7 @@ import {
   FlatList,
   Pressable,
   Dimensions,
+  Alert,
 } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
@@ -144,12 +145,16 @@ export default function App() {
     if (newTask.reminderDate) {
       const reminderDate = new Date(newTask.reminderDate);
 
-      const notificationId = await scheduleNotification(
-        newTask.title,
-        newTask.description || "Напоминание о задаче",
-        reminderDate,
-      );
-      taskToSave.notificationId = notificationId;
+      try {
+        const notificationId = await scheduleNotification(
+          newTask.title,
+          newTask.description || "Напоминание о задаче",
+          reminderDate,
+        );
+        taskToSave.notificationId = notificationId;
+      } catch (e) {
+        Alert.alert("Ошибка", "Не удалось запланировать уведомление");
+      }
     }
 
     await addTodo(taskToSave);
@@ -157,26 +162,27 @@ export default function App() {
   };
 
   const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
-    // Находим старую задачу чтобы отменить её уведомление
     const oldTodo = allTodos.find((t) => t.id === id);
 
-    // Отменяем старое уведомление если было
     if (oldTodo?.notificationId) {
       await cancelNotification(oldTodo.notificationId);
     }
 
     let taskToSave: TodoItem = { ...updatedTodo, notificationId: undefined };
 
-    // Создаём новое если нужно
     if (updatedTodo.reminderDate) {
-      const notificationId = await scheduleNotification(
-        updatedTodo.title,
-        updatedTodo.description || "Напоминание о задаче",
-        new Date(updatedTodo.reminderDate),
-      );
+      try {
+        const notificationId = await scheduleNotification(
+          updatedTodo.title,
+          updatedTodo.description || "Напоминание о задаче",
+          new Date(updatedTodo.reminderDate),
+        );
 
-      if (notificationId) {
-        taskToSave.notificationId = notificationId;
+        if (notificationId) {
+          taskToSave.notificationId = notificationId;
+        }
+      } catch (e) {
+        Alert.alert("Ошибка", "Не удалось обновить уведомление");
       }
     }
 
