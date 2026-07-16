@@ -146,12 +146,13 @@ export default function App() {
       const reminderDate = new Date(newTask.reminderDate);
 
       try {
-        const notificationId = await scheduleNotification(
+        const { notificationId, adjustedDate } = await scheduleNotification(
           newTask.title,
           newTask.description || "Напоминание о задаче",
           reminderDate,
         );
         taskToSave.notificationId = notificationId;
+        taskToSave.reminderDate = adjustedDate.toISOString();
       } catch (e) {
         Alert.alert("Ошибка", "Не удалось запланировать уведомление");
       }
@@ -172,7 +173,7 @@ export default function App() {
 
     if (updatedTodo.reminderDate) {
       try {
-        const notificationId = await scheduleNotification(
+        const { notificationId, adjustedDate } = await scheduleNotification(
           updatedTodo.title,
           updatedTodo.description || "Напоминание о задаче",
           new Date(updatedTodo.reminderDate),
@@ -181,6 +182,7 @@ export default function App() {
         if (notificationId) {
           taskToSave.notificationId = notificationId;
         }
+        taskToSave.reminderDate = adjustedDate.toISOString();
       } catch (e) {
         Alert.alert("Ошибка", "Не удалось обновить уведомление");
       }

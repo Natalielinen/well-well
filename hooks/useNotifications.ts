@@ -17,14 +17,19 @@ Notifications.setNotificationHandler({
   }),
 });
 
+export const getEffectiveReminderDate = (date: Date): Date => {
+  if (date <= new Date()) {
+    return new Date(Date.now() + 60000);
+  }
+  return date;
+};
+
 export const scheduleNotification = async (
   title: string,
   body: string,
   date: Date,
-): Promise<string | undefined> => {
-  if (date <= new Date()) {
-    date = new Date(Date.now() + 60000);
-  }
+): Promise<{ notificationId: string | undefined; adjustedDate: Date }> => {
+  const effectiveDate = getEffectiveReminderDate(date);
 
   try {
     const id = await Notifications.scheduleNotificationAsync({
@@ -32,19 +37,19 @@ export const scheduleNotification = async (
         title: `📋 ${title}`,
         body,
         sound: true,
-        data: { date: date.toISOString() },
+        data: { date: effectiveDate.toISOString() },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: date,
+        date: effectiveDate,
         ...(Platform.OS === "android" && { exact: true }),
       },
     });
 
-    return id;
+    return { notificationId: id, adjustedDate: effectiveDate };
   } catch (e) {
     Alert.alert("Ошибка уведомления", "Не удалось запланировать уведомление. Попробуйте ещё раз.");
-    return undefined;
+    return { notificationId: undefined, adjustedDate: effectiveDate };
   }
 };
 
@@ -52,13 +57,13 @@ export const cancelNotification = async (notificationId: string) => {
   await Notifications.cancelScheduledNotificationAsync(notificationId);
 };
 
-export const rescheduleNextNotification = async (todo: TodoItem): Promise<string | undefined> => {
+export const rescheduleNextNotification = async (todo: TodoItem): Promise<{ notificationId: string | undefined; adjustedDate: Date | undefined }> => {
   if (todo.notificationId) {
     await cancelNotification(todo.notificationId);
   }
 
   if (!todo.reminderDate) {
-    return undefined;
+    return { notificationId: undefined, adjustedDate: undefined };
   }
 
   let nextDate = new Date(todo.reminderDate);
@@ -69,11 +74,11 @@ export const rescheduleNextNotification = async (todo: TodoItem): Promise<string
     nextDate.setDate(nextNextDate.getDate());
   }
 
-  if (nextDate <= new Date()) {
-    nextDate = new Date(Date.now() + 60000);
-  }
+  const effectiveDate = getEffectiveReminderDate(nextDate);
 
-  return scheduleNotification(todo.title, todo.description || "Напоминание о задаче", nextDate);
+  const { notificationId } = await scheduleNotification(todo.title, todo.description || "Напоминание о задаче", effectiveDate);
+
+  return { notificationId, adjustedDate: effectiveDate };
 };
 
 export function useNotifications() {
