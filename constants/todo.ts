@@ -1,4 +1,4 @@
-import { SizeItem, SizeOption } from "../types/todo";
+import { Size, SizeItem, SizeOption } from "../types/todo";
 
 export const sizes: SizeItem = {
     1: {
@@ -35,3 +35,11 @@ export const sizeOptions: SizeOption[] = [
     { label: "2 ч - 3 ч", value: 8 },
     { label: "больше 3 ч", value: 13 },
 ];
+
+export const isValidSize = (value: number): value is Size => {
+  return sizeOptions.some((option) => option.value === value);
+};
+
+export const isValidRepeatFrequency = (value: number): boolean => {
+  return Number.isInteger(value) && value > 0;
+};
