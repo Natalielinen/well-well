@@ -5,7 +5,7 @@
 | Phase | Name | Plans | Requirements | Status |
 |-------|------|-------|--------------|--------|
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
-| 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | ○ |
+| 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
 | 3 | Refactoring | 2 | REF-01, REF-02, REF-03 | ○ |
 | 4 | Testing | 2 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
@@ -106,13 +106,13 @@ Plans:
 **Goal:** Устранить известные баги и типобезопасные уязвимости: BUGF-01 (тип `event: any` в `AddTodo.tsx`), BUGF-02 (показ ошибок пользователю в storage/notifications), BUGF-03 (runtime-валидация `Size`/`repeatFrequency`), BUGF-04 (вынос дублирующегося парсинга времени в общую утилиту).
 **Requirements**: BUGF-01, BUGF-02, BUGF-03, BUGF-04
 **Depends on:** Phase 1
-**Plans:** 4 plans
+**Plans:** 4/4 plans executed
 
 Plans:
 
-- [ ] 02-01-PLAN.md — BUGF-04: общая утилита времени utils/time.ts и миграция потребителей
-- [ ] 02-02-PLAN.md — BUGF-01: типобезопасность обработчиков DateTimePicker в AddTodo.tsx
-- [ ] 02-03-PLAN.md — BUGF-02: проброс ошибок storage и notifications пользователю
+- [x] 02-01-PLAN.md — BUGF-04: общая утилита времени utils/time.ts и миграция потребителей
+- [x] 02-02-PLAN.md — BUGF-01: типобезопасность обработчиков DateTimePicker в AddTodo.tsx
+- [x] 02-03-PLAN.md — BUGF-02: проброс ошибок storage и notifications пользователю
 - [ ] 02-04-PLAN.md — BUGF-03: runtime-валидация Size и repeatFrequency
 
 ### Phase 3: 3 Refactoring
