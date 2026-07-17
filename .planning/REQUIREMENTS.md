@@ -17,7 +17,7 @@
 - [ ] **BUGF-01**: Устранён баг с типовой небезопасностью `event: any` в `AddTodo.tsx`
 - [ ] **BUGF-02**: Исправлена обработка ошибок в `storage/todoStorage.ts` и `hooks/useNotifications.ts` (пользователь видит ошибки)
 - [ ] **BUGF-03**: Добавлена runtime-валидация для `Size` и `repeatFrequency`
-- [ ] **BUGF-04**: Убрано дублирование логики парсинга времени между `Todo.tsx` и `useNotifications.ts`
+- [x] **BUGF-04**: Убрано дублирование логики парсинга времени между `Todo.tsx` и `useNotifications.ts`
 
 ### Refactoring
 
@@ -63,7 +63,7 @@
 | BUGF-01 | Phase 2 | Pending |
 | BUGF-02 | Phase 2 | Pending |
 | BUGF-03 | Phase 2 | Pending |
-| BUGF-04 | Phase 2 | Pending |
+| BUGF-04 | Phase 2 | Complete |
 | REF-01 | Phase 3 | Pending |
 | REF-02 | Phase 3 | Pending |
 | REF-03 | Phase 3 | Pending |
@@ -73,6 +73,7 @@
 | TEST-04 | Phase 4 | Pending |
 
 **Coverage:**
+
 - v1 requirements: 14 total
 - Mapped to phases: 14
 - Unmapped: 0 ✓
