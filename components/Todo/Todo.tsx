@@ -3,6 +3,7 @@ import { TodoItem } from "../../types/todo";
 import { styles } from "./styles";
 import { sizeOptions, sizes } from "../../constants/todo";
 import { addDays, format, formatDate } from "date-fns";
+import { parseTime, formatTime } from "../../utils/time";
 import { ru } from "date-fns/locale";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
 import { colors } from "../../themes/colors";
@@ -35,9 +36,11 @@ export default function Todo({
 
     const getUpdatedTime = (nextDate: Date | string, reminderTime: string) => {
         const finalDateTime = new Date(nextDate);
-        finalDateTime.setHours(Number(reminderTime.split(':')[0]));
-        finalDateTime.setMinutes(Number(reminderTime.split(':')[1]));
-
+        const parsed = parseTime(reminderTime);
+        if (parsed) {
+            finalDateTime.setHours(parsed.getHours());
+            finalDateTime.setMinutes(parsed.getMinutes());
+        }
         return finalDateTime;
     }
 
@@ -82,7 +85,7 @@ export default function Todo({
                             addDays(new Date(), todo.repeatFrequency),
                             "yyyy-MM-dd",
                         );
-                        const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
+                        const reminderTime = todo.reminderDate ? formatTime(new Date(todo.reminderDate)) : "";
 
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
@@ -100,7 +103,7 @@ export default function Todo({
                             addDays(new Date(todo.nextDate), todo.repeatFrequency),
                             "yyyy-MM-dd",
                         );
-                        const reminderTime = todo.reminderDate ? format(new Date(todo.reminderDate), 'HH:mm') : "";
+                        const reminderTime = todo.reminderDate ? formatTime(new Date(todo.reminderDate)) : "";
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,
@@ -230,7 +233,7 @@ export default function Todo({
                                         <Bell size={12} color="#92400e" />
                                         <Text style={[styles.badgeText, { color: "#92400e" }]}>
                                             {
-                                                formatDate(new Date(todo.reminderDate), "HH:mm")
+                                                formatTime(new Date(todo.reminderDate))
                                             }
                                         </Text>
                                     </View>
