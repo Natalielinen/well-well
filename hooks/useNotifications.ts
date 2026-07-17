@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Alert } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
@@ -49,8 +48,7 @@ export const scheduleNotification = async (
 
     return { notificationId: id, adjustedDate: effectiveDate };
   } catch (e) {
-    Alert.alert("Ошибка уведомления", "Не удалось запланировать уведомление. Попробуйте ещё раз.");
-    return { notificationId: undefined, adjustedDate: effectiveDate };
+    throw e;
   }
 };
 
