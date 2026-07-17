@@ -11,7 +11,7 @@ import {
 import { styles } from "./styles";
 import { useEffect, useState } from "react";
 import { colors } from "../../themes/colors";
-import { sizeOptions } from "../../constants/todo";
+import { sizeOptions, isValidSize, isValidRepeatFrequency } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
 import { format, isBefore, startOfDay } from "date-fns";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
@@ -169,6 +169,22 @@ export default function AddTodo({
             setError({
                 ...error,
                 minDate: "Дата не может быть в прошлом",
+            });
+            return;
+        }
+
+        if (!isValidRepeatFrequency(Number(repeatFrequency))) {
+            setError({
+                ...error,
+                repeatFrequency: "Частота повторения должна быть положительным целым числом",
+            });
+            return;
+        }
+
+        if (!isValidSize(size)) {
+            setError({
+                ...error,
+                title: "Некорректный размер задачи",
             });
             return;
         }
