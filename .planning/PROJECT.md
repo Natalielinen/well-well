@@ -20,6 +20,7 @@ See: `.planning/REQUIREMENTS.md`
 - Фильтрация задач (все / сегодня)
 - Повторяющиеся задачи
 - Баннерная реклама
+- Устранить известные баги из `.planning/codebase/CONCERNS.md` (Validated in Phase 02)
 
 ### Active
 
@@ -60,4 +61,4 @@ See: `.planning/ROADMAP.md` for phase structure.
 | Отказаться от server-side sync на текущем этапе | Не в Core Value, добавляет сложность | — Pending |
 
 ---
-*Last updated: 2026-07-16 after initialization*
+*Last updated: 2026-07-17 after Phase 02 completion*
