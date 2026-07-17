@@ -103,14 +103,17 @@ Plans:
 
 ### Phase 2: 2 Fix known bugs
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Устранить известные баги и типобезопасные уязвимости: BUGF-01 (тип `event: any` в `AddTodo.tsx`), BUGF-02 (показ ошибок пользователю в storage/notifications), BUGF-03 (runtime-валидация `Size`/`repeatFrequency`), BUGF-04 (вынос дублирующегося парсинга времени в общую утилиту).
+**Requirements**: BUGF-01, BUGF-02, BUGF-03, BUGF-04
 **Depends on:** Phase 1
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 2 to break down)
+- [ ] 02-01-PLAN.md — BUGF-04: общая утилита времени utils/time.ts и миграция потребителей
+- [ ] 02-02-PLAN.md — BUGF-01: типобезопасность обработчиков DateTimePicker в AddTodo.tsx
+- [ ] 02-03-PLAN.md — BUGF-02: проброс ошибок storage и notifications пользователю
+- [ ] 02-04-PLAN.md — BUGF-03: runtime-валидация Size и repeatFrequency
 
 ### Phase 3: 3 Refactoring
 
