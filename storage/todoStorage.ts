@@ -7,7 +7,7 @@ export const saveTodos = async (todos: TodoItem[]) => {
   try {
     await AsyncStorage.setItem(TODOS_KEY, JSON.stringify(todos));
   } catch (error) {
-    console.log("Ошибка сохранения", error);
+    throw error;
   }
 };
 
@@ -16,8 +16,7 @@ export const loadTodos = async (): Promise<TodoItem[]> => {
     const data = await AsyncStorage.getItem(TODOS_KEY);
     return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.log("Ошибка загрузки", error);
-    return [];
+    throw error;
   }
 };
 
