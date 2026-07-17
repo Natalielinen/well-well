@@ -14,7 +14,7 @@ import { colors } from "../../themes/colors";
 import { sizeOptions } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
 import { format, isBefore, startOfDay } from "date-fns";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 type AddTodoProps = {
     showModal: boolean;
@@ -105,7 +105,7 @@ export default function AddTodo({
         });
     };
 
-    const onNextDateChange = (event: any, selectedDate?: Date) => {
+    const onNextDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
         setError({
             ...error,
             minDate: "",
@@ -115,7 +115,7 @@ export default function AddTodo({
         if (selectedDate) setNextDate(selectedDate);
     };
 
-    const onRemindDateChange = (event: any, selectedDate?: Date) => {
+    const onRemindDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
         setShowRemindDatepicker(false);
         if (!selectedDate) return;
 
@@ -129,7 +129,7 @@ export default function AddTodo({
         setShowRemindTimePicker(true);
     };
 
-    const onRemindTimeChange = (event: any, selectedTime?: Date) => {
+    const onRemindTimeChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
         setShowRemindTimePicker(false);
         if (!selectedTime) return;
 
