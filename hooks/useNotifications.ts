@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 import { addDays } from "date-fns";
+import { formatTime } from "../utils/time";
 import { TodoItem } from "../types/todo";
 
 // Как показывать уведомление когда приложение открыто
