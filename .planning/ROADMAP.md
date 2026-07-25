@@ -6,7 +6,7 @@
 |-------|------|-------|--------------|--------|
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
-| 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | ○ |
+| 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | In Progress|
 | 4 | Testing | 2 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
 ## Phase 1 — Fix notifications
@@ -120,12 +120,12 @@ Plans:
 **Goal:** Снизить технический долг и подготовить код к тестированию: вынести бизнес-логику из `App.tsx` в кастомные хуки (REF-01), упростить `onTaskComplete` и убрать дублирование `showAlertForExpiredTask` (REF-02), добавить cleanup и обработку ошибок во все `useEffect` в `App.tsx` (REF-03). Рефакторинг behavior-preserving.
 **Requirements**: REF-01, REF-02, REF-03
 **Depends on:** Phase 2
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — REF-01 (часть 1): вынос фильтрации/сортировки/предикатов дат в utils/todoFilters.ts + hooks/useTodoFilters.ts
+- [x] 03-01-PLAN.md — REF-01 (часть 1): вынос фильтрации/сортировки/предикатов дат в utils/todoFilters.ts + hooks/useTodoFilters.ts
 - [ ] 03-02-PLAN.md — REF-02: utils/recurrence.ts и упрощение onTaskComplete/showAlertForExpiredTask в Todo.tsx
 
 **Wave 2** *(blocked on Wave 1 completion)*
