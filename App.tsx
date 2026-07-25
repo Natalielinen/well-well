@@ -16,7 +16,7 @@ import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import AddTodo from "./components/AddTodo/AddTodo";
 import { format, isBefore, parse } from "date-fns";
-import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
+import { addTodo, updateTodo } from "./storage/todoStorage";
 import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 import { colors } from "./themes/colors";
@@ -26,12 +26,13 @@ import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNotifications } from "./hooks/useNotifications";
 import { useTodoFilters } from "./hooks/useTodoFilters";
+import { useTodos } from "./hooks/useTodos";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
+  const { allTodos, getAllTodos, setAllTodos } = useTodos();
   const [showAll, setShowAll] = useState(false);
   const [editData, setEditData] = useState<TodoItem | null>(null);
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
@@ -80,18 +81,10 @@ export default function App() {
     showAll,
   );
 
-  const getAllTodos = async () => {
-    const storedTodos = await loadTodos();
-
-    setAllTodos(storedTodos);
-
-  };
-
-  // Загружаем все задачи из хранилища при старте
+  // Загрузка allTodos при старте инкапсулирована в useTodos (см. hooks/useTodos.ts)
   useEffect(() => {
     setToday(format(new Date(), "dd.MM.yyyy"));
 
-    getAllTodos();
     setShowAll(false);
   }, []);
 
