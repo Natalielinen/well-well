@@ -120,7 +120,7 @@ Plans:
 **Goal:** Снизить технический долг и подготовить код к тестированию: вынести бизнес-логику из `App.tsx` в кастомные хуки (REF-01), упростить `onTaskComplete` и убрать дублирование `showAlertForExpiredTask` (REF-02), добавить cleanup и обработку ошибок во все `useEffect` в `App.tsx` (REF-03). Рефакторинг behavior-preserving.
 **Requirements**: REF-01, REF-02, REF-03
 **Depends on:** Phase 2
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans executed
 
 Plans:
 **Wave 1**
@@ -130,7 +130,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-03-PLAN.md — REF-01 (часть 2) + REF-03: hooks/useTodos.ts, тонкий App.tsx, cleanup и обработка ошибок во всех useEffect
+- [x] 03-03-PLAN.md — REF-01 (часть 2) + REF-03: hooks/useTodos.ts, тонкий App.tsx, cleanup и обработка ошибок во всех useEffect
 
 ### Phase 4: 4 Testing
 
