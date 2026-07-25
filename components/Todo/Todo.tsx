@@ -2,8 +2,8 @@ import { View, Text, Alert, TouchableOpacity } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "./styles";
 import { sizeOptions, sizes } from "../../constants/todo";
-import { addDays, format, formatDate } from "date-fns";
-import { parseTime, formatTime } from "../../utils/time";
+import { format, formatDate } from "date-fns";
+import { formatTime } from "../../utils/time";
 import { ru } from "date-fns/locale";
 import { removeTodo, updateTodo } from "../../storage/todoStorage";
 import { nextRecurrenceDate, nextReminderIso } from "../../utils/recurrence";
@@ -34,16 +34,6 @@ export default function Todo({
     openEditModal,
 }: TodoProps) {
     const { cancelNotification, scheduleNotification } = useNotifications();
-
-    const getUpdatedTime = (nextDate: Date | string, reminderTime: string) => {
-        const finalDateTime = new Date(nextDate);
-        const parsed = parseTime(reminderTime);
-        if (parsed) {
-            finalDateTime.setHours(parsed.getHours());
-            finalDateTime.setMinutes(parsed.getMinutes());
-        }
-        return finalDateTime;
-    }
 
     const handleCompleteTask = async (lastUpdated: string, nextDate: string, reminderDate?: string) => {
         const updatedTodo = { ...todo, lastUpdated, nextDate, reminderDate };
@@ -82,16 +72,12 @@ export default function Todo({
                 {
                     text: "Сегодня",
                     onPress: async () => {
-                        const newNextDate = format(
-                            addDays(new Date(), todo.repeatFrequency),
-                            "yyyy-MM-dd",
-                        );
-                        const reminderTime = todo.reminderDate ? formatTime(new Date(todo.reminderDate)) : "";
+                        const newNextDate = nextRecurrenceDate(new Date(), todo.repeatFrequency);
 
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,
-                            todo.reminderDate ? getUpdatedTime(newNextDate, reminderTime).toISOString() : undefined
+                            nextReminderIso(newNextDate, todo.reminderDate)
                         )
 
                         await getAllTodos();
@@ -100,15 +86,12 @@ export default function Todo({
                 {
                     text: "Дата в задаче",
                     onPress: async () => {
-                        const newNextDate = format(
-                            addDays(new Date(todo.nextDate), todo.repeatFrequency),
-                            "yyyy-MM-dd",
-                        );
-                        const reminderTime = todo.reminderDate ? formatTime(new Date(todo.reminderDate)) : "";
+                        const newNextDate = nextRecurrenceDate(new Date(todo.nextDate), todo.repeatFrequency);
+
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,
-                            todo.reminderDate ? getUpdatedTime(newNextDate, reminderTime).toISOString() : undefined
+                            nextReminderIso(newNextDate, todo.reminderDate)
                         );
                         await getAllTodos();
                     },
