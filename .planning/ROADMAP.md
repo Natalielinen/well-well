@@ -6,7 +6,7 @@
 |-------|------|-------|--------------|--------|
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
-| 3 | Refactoring | 2 | REF-01, REF-02, REF-03 | ○ |
+| 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | Complete    |
 | 4 | Testing | 2 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
 ## Phase 1 — Fix notifications
@@ -117,14 +117,20 @@ Plans:
 
 ### Phase 3: 3 Refactoring
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Снизить технический долг и подготовить код к тестированию: вынести бизнес-логику из `App.tsx` в кастомные хуки (REF-01), упростить `onTaskComplete` и убрать дублирование `showAlertForExpiredTask` (REF-02), добавить cleanup и обработку ошибок во все `useEffect` в `App.tsx` (REF-03). Рефакторинг behavior-preserving.
+**Requirements**: REF-01, REF-02, REF-03
 **Depends on:** Phase 2
-**Plans:** 0 plans
+**Plans:** 3/3 plans executed
 
 Plans:
+**Wave 1**
 
-- [ ] TBD (run /gsd-plan-phase 3 to break down)
+- [x] 03-01-PLAN.md — REF-01 (часть 1): вынос фильтрации/сортировки/предикатов дат в utils/todoFilters.ts + hooks/useTodoFilters.ts
+- [x] 03-02-PLAN.md — REF-02: utils/recurrence.ts и упрощение onTaskComplete/showAlertForExpiredTask в Todo.tsx
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 03-03-PLAN.md — REF-01 (часть 2) + REF-03: hooks/useTodos.ts, тонкий App.tsx, cleanup и обработка ошибок во всех useEffect
 
 ### Phase 4: 4 Testing
 

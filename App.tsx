@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,21 +9,12 @@ import {
   FlatList,
   Pressable,
   Dimensions,
-  Alert,
 } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import AddTodo from "./components/AddTodo/AddTodo";
-import {
-  format,
-  isAfter,
-  isBefore,
-  isSameDay,
-  parse,
-  startOfDay,
-} from "date-fns";
-import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
+import { format, isBefore, parse } from "date-fns";
 import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 import { colors } from "./themes/colors";
@@ -32,24 +22,37 @@ import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNotifications } from "./hooks/useNotifications";
+import { useTodoFilters } from "./hooks/useTodoFilters";
+import { useTodos } from "./hooks/useTodos";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
+  const { allTodos, getAllTodos, onAddTodo, onUpdateTodo } = useTodos();
   const [showAll, setShowAll] = useState(false);
   const [editData, setEditData] = useState<TodoItem | null>(null);
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
   const [prevDateLoading, setPrevDateLoading] = useState(false);
 
-  const { scheduleNotification, cancelNotification } = useNotifications();
-
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
-    BannerAdSize.stickySize(width).then(setBannerSize);
+    let mounted = true;
+
+    BannerAdSize.stickySize(width)
+      .then((size) => {
+        if (mounted) {
+          setBannerSize(size);
+        }
+      })
+      .catch((e) => {
+        console.log("Не удалось получить размер рекламного баннера", e);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Date navigation
@@ -76,58 +79,31 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      // Configure the user privacy data policy before init sdk
-      await MobileAds.initialize();
+      try {
+        // Configure the user privacy data policy before init sdk
+        await MobileAds.initialize();
+      } catch (e) {
+        console.log("Не удалось инициализировать MobileAds", e);
+      }
     })();
-  });
+    // Пустой массив зависимостей: инициализация SDK должна выполняться один раз при монтировании, а не на каждый рендер
+  }, []);
 
-  const isExpired = (todo: TodoItem) =>
-    isBefore(
-      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
-      startOfDay(new Date()),
-    );
+  const { displayedTodos, isExpired, isFuture } = useTodoFilters(
+    allTodos,
+    selectedDate,
+    showAll,
+  );
 
-  const isToday = (todo: TodoItem) =>
-    isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
-
-  const isFuture = (todo: TodoItem) =>
-    isAfter(
-      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
-      startOfDay(new Date()),
-    );
-
-  const sortByDate = (todos: TodoItem[]) =>
-    [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
-
-  const displayedTodos = useMemo(() => {
-    if (showAll) {
-      const expired = sortByDate(allTodos.filter(isExpired));
-      const rest = sortByDate(allTodos.filter((todo) => !isExpired(todo)));
-
-      return [...expired, ...rest];
-    }
-
-    const expired = sortByDate(allTodos.filter(isExpired));
-    const today = sortByDate(allTodos.filter(isToday));
-
-    return [...expired, ...today];
-  }, [allTodos, selectedDate, showAll]);
-
-  const getAllTodos = async () => {
-    const storedTodos = await loadTodos();
-
-    setAllTodos(storedTodos);
-
-  };
-
-  // Загружаем все задачи из хранилища при старте
+  // Загрузка allTodos при старте инкапсулирована в useTodos (см. hooks/useTodos.ts)
+  // Синхронный эффект (только setState), async-операций и подписок нет — cleanup не требуется
   useEffect(() => {
     setToday(format(new Date(), "dd.MM.yyyy"));
 
-    getAllTodos();
     setShowAll(false);
   }, []);
 
+  // Синхронный эффект (только setState) — cleanup не требуется
   useEffect(() => {
     setToday(format(selectedDate, "dd.MM.yyyy"));
   }, [selectedDate]);
@@ -138,59 +114,6 @@ export default function App() {
     parse(today, "dd.MM.yyyy", new Date()),
     new Date(),
   );
-
-  const onAddTodo = async (newTask: TodoItem) => {
-    let taskToSave = { ...newTask };
-
-    if (newTask.reminderDate) {
-      const reminderDate = new Date(newTask.reminderDate);
-
-      try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
-          newTask.title,
-          newTask.description || "Напоминание о задаче",
-          reminderDate,
-        );
-        taskToSave.notificationId = notificationId;
-        taskToSave.reminderDate = adjustedDate.toISOString();
-      } catch (e) {
-        Alert.alert("Ошибка", "Не удалось запланировать уведомление");
-      }
-    }
-
-    await addTodo(taskToSave);
-    setAllTodos((prev) => [taskToSave, ...prev]);
-  };
-
-  const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
-    const oldTodo = allTodos.find((t) => t.id === id);
-
-    if (oldTodo?.notificationId) {
-      await cancelNotification(oldTodo.notificationId);
-    }
-
-    let taskToSave: TodoItem = { ...updatedTodo, notificationId: undefined };
-
-    if (updatedTodo.reminderDate) {
-      try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
-          updatedTodo.title,
-          updatedTodo.description || "Напоминание о задаче",
-          new Date(updatedTodo.reminderDate),
-        );
-
-        if (notificationId) {
-          taskToSave.notificationId = notificationId;
-        }
-        taskToSave.reminderDate = adjustedDate.toISOString();
-      } catch (e) {
-        Alert.alert("Ошибка", "Не удалось обновить уведомление");
-      }
-    }
-
-    await updateTodo(id, taskToSave);
-    getAllTodos();
-  };
 
   const onFilterChange = () => {
     setShowAll((prev) => !prev);
