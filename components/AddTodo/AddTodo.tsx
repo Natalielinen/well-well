@@ -173,7 +173,7 @@ export default function AddTodo({
             return;
         }
 
-        if (!isValidRepeatFrequency(Number(repeatFrequency))) {
+        if (isRepeat && !isValidRepeatFrequency(Number(repeatFrequency))) {
             setError({
                 ...error,
                 repeatFrequency: "Частота повторения должна быть положительным целым числом",
