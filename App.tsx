@@ -9,14 +9,12 @@ import {
   FlatList,
   Pressable,
   Dimensions,
-  Alert,
 } from "react-native";
 import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import AddTodo from "./components/AddTodo/AddTodo";
 import { format, isBefore, parse } from "date-fns";
-import { addTodo, updateTodo } from "./storage/todoStorage";
 import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
 import { colors } from "./themes/colors";
@@ -24,7 +22,6 @@ import Header from "./components/Header/Header";
 import WeekStrip from "./components/WeekStrip/WeekStrip";
 import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNotifications } from "./hooks/useNotifications";
 import { useTodoFilters } from "./hooks/useTodoFilters";
 import { useTodos } from "./hooks/useTodos";
 
@@ -32,13 +29,11 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAddModal, setShowAddModal] = useState(false);
   const [today, setToday] = useState(format(new Date(), "dd.MM.yyyy")); // формат для отображения в UI
-  const { allTodos, getAllTodos, setAllTodos } = useTodos();
+  const { allTodos, getAllTodos, onAddTodo, onUpdateTodo } = useTodos();
   const [showAll, setShowAll] = useState(false);
   const [editData, setEditData] = useState<TodoItem | null>(null);
   const [bannerSize, setBannerSize] = useState<BannerAdSize | null>(null);
   const [prevDateLoading, setPrevDateLoading] = useState(false);
-
-  const { scheduleNotification, cancelNotification } = useNotifications();
 
   const { width } = Dimensions.get("window");
 
@@ -98,59 +93,6 @@ export default function App() {
     parse(today, "dd.MM.yyyy", new Date()),
     new Date(),
   );
-
-  const onAddTodo = async (newTask: TodoItem) => {
-    let taskToSave = { ...newTask };
-
-    if (newTask.reminderDate) {
-      const reminderDate = new Date(newTask.reminderDate);
-
-      try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
-          newTask.title,
-          newTask.description || "Напоминание о задаче",
-          reminderDate,
-        );
-        taskToSave.notificationId = notificationId;
-        taskToSave.reminderDate = adjustedDate.toISOString();
-      } catch (e) {
-        Alert.alert("Ошибка", "Не удалось запланировать уведомление");
-      }
-    }
-
-    await addTodo(taskToSave);
-    setAllTodos((prev) => [taskToSave, ...prev]);
-  };
-
-  const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
-    const oldTodo = allTodos.find((t) => t.id === id);
-
-    if (oldTodo?.notificationId) {
-      await cancelNotification(oldTodo.notificationId);
-    }
-
-    let taskToSave: TodoItem = { ...updatedTodo, notificationId: undefined };
-
-    if (updatedTodo.reminderDate) {
-      try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
-          updatedTodo.title,
-          updatedTodo.description || "Напоминание о задаче",
-          new Date(updatedTodo.reminderDate),
-        );
-
-        if (notificationId) {
-          taskToSave.notificationId = notificationId;
-        }
-        taskToSave.reminderDate = adjustedDate.toISOString();
-      } catch (e) {
-        Alert.alert("Ошибка", "Не удалось обновить уведомление");
-      }
-    }
-
-    await updateTodo(id, taskToSave);
-    getAllTodos();
-  };
 
   const onFilterChange = () => {
     setShowAll((prev) => !prev);
