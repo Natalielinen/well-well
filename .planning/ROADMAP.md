@@ -123,9 +123,13 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 03-01-PLAN.md — REF-01 (часть 1): вынос фильтрации/сортировки/предикатов дат в utils/todoFilters.ts + hooks/useTodoFilters.ts
 - [ ] 03-02-PLAN.md — REF-02: utils/recurrence.ts и упрощение onTaskComplete/showAlertForExpiredTask в Todo.tsx
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 03-03-PLAN.md — REF-01 (часть 2) + REF-03: hooks/useTodos.ts, тонкий App.tsx, cleanup и обработка ошибок во всех useEffect
 
 ### Phase 4: 4 Testing
