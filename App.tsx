@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -16,14 +15,7 @@ import Todo from "./components/Todo/Todo";
 import { TodoItem } from "./types/todo";
 import { styles } from "./styles";
 import AddTodo from "./components/AddTodo/AddTodo";
-import {
-  format,
-  isAfter,
-  isBefore,
-  isSameDay,
-  parse,
-  startOfDay,
-} from "date-fns";
+import { format, isBefore, parse } from "date-fns";
 import { addTodo, loadTodos, updateTodo } from "./storage/todoStorage";
 import { StatusBar } from "expo-status-bar";
 import { MobileAds, BannerAdSize, BannerView } from "yandex-mobile-ads";
@@ -82,25 +74,11 @@ export default function App() {
     })();
   });
 
-  const isExpired = (todo: TodoItem) =>
-    isBefore(
-      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
-      startOfDay(new Date()),
-    );
-
-  const isToday = (todo: TodoItem) =>
-    isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
-
-  const isFuture = (todo: TodoItem) =>
-    isAfter(
-      parse(todo.nextDate, "yyyy-MM-dd", new Date()),
-      startOfDay(new Date()),
-    );
-
-  const sortByDate = (todos: TodoItem[]) =>
-    [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
-
-  const { displayedTodos } = useTodoFilters(allTodos, selectedDate, showAll);
+  const { displayedTodos, isExpired, isFuture } = useTodoFilters(
+    allTodos,
+    selectedDate,
+    showAll,
+  );
 
   const getAllTodos = async () => {
     const storedTodos = await loadTodos();
