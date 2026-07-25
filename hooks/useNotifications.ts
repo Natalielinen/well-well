@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
-import { addDays } from "date-fns";
 import { formatTime } from "../utils/time";
 import { TodoItem } from "../types/todo";
 
@@ -65,13 +64,10 @@ export const rescheduleNextNotification = async (todo: TodoItem): Promise<{ noti
     return { notificationId: undefined, adjustedDate: undefined };
   }
 
-  let nextDate = new Date(todo.reminderDate);
-  if (todo.repeatFrequency && todo.nextDate) {
-    const nextNextDate = addDays(new Date(todo.nextDate), todo.repeatFrequency);
-    nextDate.setFullYear(nextNextDate.getFullYear());
-    nextDate.setMonth(nextNextDate.getMonth());
-    nextDate.setDate(nextNextDate.getDate());
-  }
+  // reminderDate уже указывает на следующее выполнение (её вычислил вызывающий
+  // код в onTaskComplete). Здесь дату НЕ сдвигаем повторно — иначе уведомление
+  // уезжает на repeatFrequency вперёд и накапливает сдвиг при каждом выполнении.
+  const nextDate = new Date(todo.reminderDate);
 
   const effectiveDate = getEffectiveReminderDate(nextDate);
 

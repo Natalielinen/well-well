@@ -90,7 +90,7 @@ export default function Todo({
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,
-                            todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+                            todo.reminderDate ? getUpdatedTime(newNextDate, reminderTime).toISOString() : undefined
                         )
 
                         await getAllTodos();
@@ -107,7 +107,7 @@ export default function Todo({
                         await handleCompleteTask(
                             format(new Date(), "yyyy-MM-dd"),
                             newNextDate,
-                            todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+                            todo.reminderDate ? getUpdatedTime(newNextDate, reminderTime).toISOString() : undefined
                         );
                         await getAllTodos();
                     },
@@ -151,7 +151,7 @@ export default function Todo({
             await handleCompleteTask(
                 format(new Date(), "yyyy-MM-dd"),
                 format(newNextDate, "yyyy-MM-dd"),
-                todo.reminderDate ? format(getUpdatedTime(newNextDate, reminderTime), 'yyyy-MM-dd HH:mm') : undefined
+                todo.reminderDate ? getUpdatedTime(newNextDate, reminderTime).toISOString() : undefined
             )
             showAlert(
                 "Успешно",
