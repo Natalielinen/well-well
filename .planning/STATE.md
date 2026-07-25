@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-07-25T11:31:00.000Z"
+stopped_at: Phase 03 complete (verified — 2 smoke-test items recommended before Phase 4)
+last_updated: "2026-07-25T12:00:00.000Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
   completed_plans: 12
 ---
@@ -19,20 +19,21 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-07-16)
 
 **Core value:** Надёжное выполнение задач с своевременными уведомлениями
-**Current focus:** Phase 03 — 3-refactoring
+**Current focus:** Phase 03 завершена — следующая Phase 4 (Testing)
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
 | 1     | Awaiting verification | 3/3   | Executed |
-| 2     | ◆      | 4/4   | 100%     |
-| 3     | Awaiting verification | 3/3   | Executed |
+| 2     | ✓ Complete | 4/4   | 100%     |
+| 3     | ✓ Complete | 3/3   | 100%     |
 | 4     | ○      | 0/2   | 0%       |
 
 ## Next Actions
 
-1. Верифицировать Phase 3 (REF-01, REF-02, REF-03 выполнены) и запланировать Phase 4 (Testing)
+1. Ручной smoke-тест 2 пунктов из 03-VERIFICATION.md (просроченная/будущая повторяющаяся задача; CRUD + баннер после выноса в useTodos) перед Phase 4
+2. Запланировать Phase 4 (Testing) — `/gsd-plan-phase 4`. Unit-тесты для utils/todoFilters, utils/recurrence станут регрессионной сетью рефакторинга.
 
 ---
 
