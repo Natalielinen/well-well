@@ -38,7 +38,21 @@ export default function App() {
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
-    BannerAdSize.stickySize(width).then(setBannerSize);
+    let mounted = true;
+
+    BannerAdSize.stickySize(width)
+      .then((size) => {
+        if (mounted) {
+          setBannerSize(size);
+        }
+      })
+      .catch((e) => {
+        console.log("Не удалось получить размер рекламного баннера", e);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Date navigation
@@ -65,10 +79,15 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      // Configure the user privacy data policy before init sdk
-      await MobileAds.initialize();
+      try {
+        // Configure the user privacy data policy before init sdk
+        await MobileAds.initialize();
+      } catch (e) {
+        console.log("Не удалось инициализировать MobileAds", e);
+      }
     })();
-  });
+    // Пустой массив зависимостей: инициализация SDK должна выполняться один раз при монтировании, а не на каждый рендер
+  }, []);
 
   const { displayedTodos, isExpired, isFuture } = useTodoFilters(
     allTodos,
@@ -77,12 +96,14 @@ export default function App() {
   );
 
   // Загрузка allTodos при старте инкапсулирована в useTodos (см. hooks/useTodos.ts)
+  // Синхронный эффект (только setState), async-операций и подписок нет — cleanup не требуется
   useEffect(() => {
     setToday(format(new Date(), "dd.MM.yyyy"));
 
     setShowAll(false);
   }, []);
 
+  // Синхронный эффект (только setState) — cleanup не требуется
   useEffect(() => {
     setToday(format(selectedDate, "dd.MM.yyyy"));
   }, [selectedDate]);
