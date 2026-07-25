@@ -22,7 +22,7 @@
 ### Refactoring
 
 - [ ] **REF-01**: Вынесена бизнес-логика из `App.tsx` в отдельные хуки/утилиты
-- [ ] **REF-02**: Упрощена функция `onTaskComplete` в `Todo.tsx` с удалением дублирования `showAlertForExpiredTask`
+- [x] **REF-02**: Упрощена функция `onTaskComplete` в `Todo.tsx` с удалением дублирования `showAlertForExpiredTask`
 - [ ] **REF-03**: Добавлен cleanup и обработка ошибок в `useEffect` в `App.tsx`
 
 ### Testing
@@ -65,7 +65,7 @@
 | BUGF-03 | Phase 2 | Complete |
 | BUGF-04 | Phase 2 | Complete |
 | REF-01 | Phase 3 | Pending |
-| REF-02 | Phase 3 | Pending |
+| REF-02 | Phase 3 | Complete |
 | REF-03 | Phase 3 | Pending |
 | TEST-01 | Phase 4 | Pending |
 | TEST-02 | Phase 4 | Pending |
