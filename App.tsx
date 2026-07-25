@@ -33,6 +33,7 @@ import WeekStrip from "./components/WeekStrip/WeekStrip";
 import EmptyState from "./components/EmptyState/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNotifications } from "./hooks/useNotifications";
+import { useTodoFilters } from "./hooks/useTodoFilters";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -99,19 +100,7 @@ export default function App() {
   const sortByDate = (todos: TodoItem[]) =>
     [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
 
-  const displayedTodos = useMemo(() => {
-    if (showAll) {
-      const expired = sortByDate(allTodos.filter(isExpired));
-      const rest = sortByDate(allTodos.filter((todo) => !isExpired(todo)));
-
-      return [...expired, ...rest];
-    }
-
-    const expired = sortByDate(allTodos.filter(isExpired));
-    const today = sortByDate(allTodos.filter(isToday));
-
-    return [...expired, ...today];
-  }, [allTodos, selectedDate, showAll]);
+  const { displayedTodos } = useTodoFilters(allTodos, selectedDate, showAll);
 
   const getAllTodos = async () => {
     const storedTodos = await loadTodos();
