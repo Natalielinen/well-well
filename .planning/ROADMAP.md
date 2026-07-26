@@ -7,7 +7,7 @@
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
 | 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | Complete    |
-| 4 | Testing | 2 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
+| 4 | Testing | 3 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
 ## Phase 1 — Fix notifications
 
@@ -134,14 +134,20 @@ Plans:
 
 ### Phase 4: 4 Testing
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Покрыть код автоматическими тестами для стабилизации изменений после Phase 3: unit-тесты чистых утилит дат/фильтрации (TEST-01) и логики повторения (TEST-02), unit-тесты `hooks/useNotifications.ts` с моками `expo-notifications` (TEST-03), интеграционные тесты `storage/todoStorage.ts` с official AsyncStorage mock (TEST-04). Включает первичную настройку `jest-expo`. Регрессионный контракт: единственный сдвиг `repeatFrequency` при завершении.
+**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04
 **Depends on:** Phase 3
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
+**Wave 1**
 
-- [ ] TBD (run /gsd-plan-phase 4 to break down)
+- [ ] 04-01-PLAN.md — Тулчейн jest-expo + первый зелёный тест utils/time.ts (TEST-01); legitimacy-checkpoint jest-expo
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-02-PLAN.md — Чистые утилиты: todoFilters (TEST-01) + recurrence (TEST-02, регрессия единственного сдвига)
+- [ ] 04-03-PLAN.md — Мокируемые модули: useNotifications с expo-notifications mock (TEST-03) + todoStorage с AsyncStorage mock (TEST-04)
 
 ---
 *Roadmap created: 2026-07-16*
