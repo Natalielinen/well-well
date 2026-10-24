@@ -7,7 +7,7 @@
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
 | 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | Complete    |
-| 03.1 | Fix new known bugs (INSERTED) | — | BUGF-05, BUGF-06, BUGF-07, BUGF-08, BUGF-09, BUGF-10 | ○ |
+| 03.1 | Fix new known bugs (INSERTED) | 4 | BUGF-05, BUGF-06, BUGF-07, BUGF-08, BUGF-09, BUGF-10 | ○ |
 | 4 | Testing | 3 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
 ## Phase 1 — Fix notifications
@@ -138,7 +138,7 @@ Plans:
 **Goal:** Исправить баги, найденные при повторном картировании кода (`.planning/codebase/CONCERNS.md`, 2026-10-24), до написания тестов в Phase 4 — чтобы тесты фиксировали уже корректное поведение: отмена уведомления при выполнении неповторяющейся задачи (BUGF-05), единая работа с датами как с локальными календарными строками без сдвига на сутки (BUGF-06), обновление списка после выполнения независимо от Alert (BUGF-07), сохранение по актуальной записи вместо устаревшего пропса (BUGF-08), консистентное состояние при ошибке планирования уведомления (BUGF-09), валидация прошедшего времени напоминания вместо тихого переноса на +60 с (BUGF-10).
 **Requirements**: BUGF-05, BUGF-06, BUGF-07, BUGF-08, BUGF-09, BUGF-10
 **Depends on:** Phase 3
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Context:
 
@@ -160,7 +160,15 @@ Success criteria:
 - Выбор прошедшего времени напоминания в `AddTodo` показывает ошибку валидации вместо тихого переноса.
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 03.1 to break down)
+**Wave 1**
+
+- [ ] 03.1-01-PLAN.md — BUGF-06: утилита parseDateKey/toDateKey в utils/time.ts; WeekStrip, recurrence, todoFilters на локальных календарных днях
+- [ ] 03.1-02-PLAN.md — BUGF-09 + D-04 (BUGF-10): без переноса прошедшего времени на +60 с; при сбое планирования задача сохраняется без напоминания и пользователь видит причину
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03.1-03-PLAN.md — BUGF-05/07/08 + D-07/D-09: выполнение задачи по актуальной записи (getTodo/patchTodo), отмена уведомления, немедленное обновление списка, «Отмена» в алерте, локальные даты на карточке
+- [ ] 03.1-04-PLAN.md — BUGF-10 (D-01…D-03) + BUGF-06 в форме: видимая ошибка прошедшего напоминания, значение по умолчанию «дата задачи + следующий час», проверка только изменённого напоминания
 
 ### Phase 4: 4 Testing
 
