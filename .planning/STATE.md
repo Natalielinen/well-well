@@ -1,15 +1,16 @@
 ---
-gsd_state_version: 1.0
+gsd_state_version: "1.0"
 milestone: v1.0
-milestone_name: milestone
 status: in_progress
-stopped_at: Phase 4 planned
-last_updated: "2026-07-26T06:13:10.000Z"
+stopped_at: Phase 03.1 inserted
+last_updated: "2026-10-24T06:15:59.413Z"
+state_head: 3b908cd30e80d679c37da70d8fdd3b2bbe8c6c34
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 3
-  total_plans: 12
+  total_plans: 15
   completed_plans: 12
+milestone_name: milestone
 ---
 
 # STATE
@@ -19,7 +20,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-07-16)
 
 **Core value:** Надёжное выполнение задач с своевременными уведомлениями
-**Current focus:** Phase 4 (Testing) спланирована — 3 плана в 2 волнах, готова к выполнению
+**Current focus:** Phase 03.1 (Fix new known bugs) вставлена перед тестированием — нужно спланировать
 
 ## Progress
 
@@ -28,16 +29,19 @@ See: `.planning/PROJECT.md` (updated 2026-07-16)
 | 1     | Awaiting verification | 3/3   | Executed |
 | 2     | ✓ Complete | 4/4   | 100%     |
 | 3     | ✓ Complete | 3/3   | 100%     |
-| 4     | Ready to execute | 0/3   | Planned  |
+| 03.1  | Not planned | 0/0   | —        |
+| 4     | Ready to execute (после 03.1) | 0/3   | Planned  |
 
 ## Next Actions
 
-1. Выполнить Phase 4 (Testing) — `/gsd-execute-phase 4`. Wave 1 (04-01) поднимает jest-expo и первый зелёный тест; на `jest-expo` стоит human-verify checkpoint (сработает даже в yolo). Wave 2 (04-02, 04-03) — параллельно после тулчейна.
-2. Опционально до выполнения: ручной smoke-тест 2 пунктов из 03-VERIFICATION.md (просроченная/будущая повторяющаяся задача; CRUD + баннер после выноса в useTodos).
+1. Спланировать Phase 03.1 (Fix new known bugs, BUGF-05..10) — `/gsd-plan-phase 03.1`, затем выполнить.
+2. После 03.1 перепроверить планы Phase 4: 04-02 тестирует `utils/todoFilters.ts`/`utils/recurrence.ts`, а BUGF-06 меняет парсинг дат.
+3. Выполнить Phase 4 (Testing) — `/gsd-execute-phase 4`. Wave 1 (04-01) поднимает jest-expo и первый зелёный тест; на `jest-expo` стоит human-verify checkpoint (сработает даже в yolo). Wave 2 (04-02, 04-03) — параллельно после тулчейна.
+4. Опционально до выполнения: ручной smoke-тест 2 пунктов из 03-VERIFICATION.md (просроченная/будущая повторяющаяся задача; CRUD + баннер после выноса в useTodos).
 
 ---
 
-*Last updated: 2026-07-26 after planning Phase 4*
+*Last updated: 2026-10-24 after inserting Phase 03.1*
 
 ## Session
 
@@ -58,3 +62,9 @@ See: `.planning/PROJECT.md` (updated 2026-07-16)
 - [Phase 03]: isExpired/isFuture принимают необязательный now (default new Date()) для будущего unit-тестирования без моков времени
 - [Phase 03]: nextReminderIso поглощает formatTime целиком — вызывающий код передаёт reminderDate как есть, без предварительного вычисления reminderTime
 - [Phase 03]: useTodos вызывает useNotifications() внутри себя (инкапсуляция уведомлений вместе с CRUD задач), а не принимает их параметрами извне
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 03.1 inserted after Phase 3: Fix new known bugs (BUGF-05..10 из CONCERNS.md 2026-10-24), до тестирования (URGENT)

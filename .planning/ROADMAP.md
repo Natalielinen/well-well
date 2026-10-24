@@ -7,6 +7,7 @@
 | 1 | Fix notifications | 3 | NOTF-01, NOTF-02, NOTF-03, NOTF-04 | In Progress|
 | 2 | Fix known bugs | 2 | BUGF-01, BUGF-02, BUGF-03, BUGF-04 | Complete    |
 | 3 | Refactoring | 3 | REF-01, REF-02, REF-03 | Complete    |
+| 03.1 | Fix new known bugs (INSERTED) | — | BUGF-05, BUGF-06, BUGF-07, BUGF-08, BUGF-09, BUGF-10 | ○ |
 | 4 | Testing | 3 | TEST-01, TEST-02, TEST-03, TEST-04 | ○ |
 
 ## Phase 1 — Fix notifications
@@ -132,11 +133,40 @@ Plans:
 
 - [x] 03-03-PLAN.md — REF-01 (часть 2) + REF-03: hooks/useTodos.ts, тонкий App.tsx, cleanup и обработка ошибок во всех useEffect
 
+### Phase 03.1: Fix new known bugs (INSERTED)
+
+**Goal:** Исправить баги, найденные при повторном картировании кода (`.planning/codebase/CONCERNS.md`, 2026-10-24), до написания тестов в Phase 4 — чтобы тесты фиксировали уже корректное поведение: отмена уведомления при выполнении неповторяющейся задачи (BUGF-05), единая работа с датами как с локальными календарными строками без сдвига на сутки (BUGF-06), обновление списка после выполнения независимо от Alert (BUGF-07), сохранение по актуальной записи вместо устаревшего пропса (BUGF-08), консистентное состояние при ошибке планирования уведомления (BUGF-09), валидация прошедшего времени напоминания вместо тихого переноса на +60 с (BUGF-10).
+**Requirements**: BUGF-05, BUGF-06, BUGF-07, BUGF-08, BUGF-09, BUGF-10
+**Depends on:** Phase 3
+**Plans:** 0 plans
+
+Context:
+
+- `components/Todo/Todo.tsx` (`onTaskComplete`, ветка `!todo.isRepeat`) вызывает `removeTodo` без `cancelNotification` — подтверждено в коде.
+- `components/WeekStrip/WeekStrip.tsx` сравнивает даты через `toISOString().split("T")[0]` — в UTC+3 локальная полночь даёт предыдущий день; `utils/todoFilters.ts` парсит локально через `parse(...)`, а `Todo.tsx`/`utils/recurrence.ts` — через `new Date("yyyy-MM-dd")` (UTC).
+- `Todo.tsx` вызывает `getAllTodos()` только из кнопки Alert; на Android Alert закрывается тапом вне окна.
+- `handleCompleteTask` сохраняет `{ ...todo }` из пропса, `updateTodo` перезаписывает запись целиком.
+- `hooks/useTodos.ts` (`onUpdateTodo`): при ошибке `scheduleNotification` старое уведомление уже отменено, а `reminderDate` остаётся. Пересекается с NOTF-04 (Phase 1).
+- `hooks/useNotifications.ts` (`getEffectiveReminderDate`) молча подменяет прошедшее время на now + 60 с.
+- Регрессионный контракт Phase 3/4 сохраняется: единственный сдвиг `repeatFrequency` при завершении.
+
+Success criteria:
+
+- После выполнения неповторяющейся задачи её уведомление отменено (нет в `getAllScheduledNotificationsAsync`).
+- В UTC+3 и UTC−5 точки в `WeekStrip`, фильтры и дата на карточке показывают один и тот же календарный день; парсинг/форматирование `nextDate` идёт через одну утилиту в `utils/time.ts`, `new Date("yyyy-MM-dd")` и `toISOString()` для календарных дат в коде не осталось.
+- Список обновляется сразу после выполнения задачи, даже если Alert закрыт тапом вне окна.
+- Выполнение задачи не затирает поля, изменённые после рендера карточки (обновление по `id` из хранилища).
+- При ошибке планирования напоминания задача сохраняется без `reminderDate`/`notificationId`, пользователь видит, что напоминание не сохранено.
+- Выбор прошедшего времени напоминания в `AddTodo` показывает ошибку валидации вместо тихого переноса.
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 03.1 to break down)
+
 ### Phase 4: 4 Testing
 
 **Goal:** Покрыть код автоматическими тестами для стабилизации изменений после Phase 3: unit-тесты чистых утилит дат/фильтрации (TEST-01) и логики повторения (TEST-02), unit-тесты `hooks/useNotifications.ts` с моками `expo-notifications` (TEST-03), интеграционные тесты `storage/todoStorage.ts` с official AsyncStorage mock (TEST-04). Включает первичную настройку `jest-expo`. Регрессионный контракт: единственный сдвиг `repeatFrequency` при завершении.
 **Requirements**: TEST-01, TEST-02, TEST-03, TEST-04
-**Depends on:** Phase 3
+**Depends on:** Phase 03.1
 **Plans:** 3 plans
 
 Plans:
