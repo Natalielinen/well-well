@@ -2,9 +2,9 @@
 gsd_state_version: "1.0"
 milestone: v1.0
 status: in_progress
-stopped_at: Phase 03.1 inserted
-last_updated: "2026-10-24T06:15:59.413Z"
-state_head: 3b908cd30e80d679c37da70d8fdd3b2bbe8c6c34
+stopped_at: Phase 03.1 context gathered
+last_updated: "2026-10-24T07:20:58.556Z"
+state_head: 726ce48b0a42ca5c9b7a32e89671e966cd260ae6
 progress:
   total_phases: 5
   completed_phases: 3
@@ -45,9 +45,9 @@ See: `.planning/PROJECT.md` (updated 2026-07-16)
 
 ## Session
 
-**Last session:** 2026-07-26T06:13:10.000Z
-**Stopped at:** Phase 4 planned (3 плана, готова к выполнению)
-**Resume file:** .planning/phases/04-4-testing/04-01-PLAN.md
+**Last session:** 2026-10-24T07:20:58.276Z
+**Stopped at:** Phase 03.1 context gathered
+**Resume file:** .planning/phases/03.1-fix-new-known-bugs/03.1-CONTEXT.md
 
 ## Performance Metrics
 
