@@ -3,6 +3,19 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const ts = require('typescript');
 const Module = require('node:module');
+const deferred = () => {
+  let resolve;
+  const promise = new Promise(done => { resolve = done; });
+  return { promise, resolve };
+};
+async function bounded(promise) {
+  let timer;
+  try {
+    return await Promise.race([promise, new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error('Проверка зависла на await')), 3000);
+    })]);
+  } finally { clearTimeout(timer); }
+}
 require.extensions['.ts'] = (module, filename) => {
   module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
@@ -97,20 +110,46 @@ async function checkNotifications() {
     assert.deepEqual(cancelled, ['old-id']);
     assert.equal(scheduled.at(-1).trigger.date.toISOString(), task.reminderDate);
     console.log('NOTIFICATIONS_OK');
+    // CR-02: время истекает именно во время незавершённого permissions Promise.
+    const realNow = Date.now;
+    const getPermissions = notifications.getPermissionsAsync;
+    try {
+      for (const elapsed of [1000, 2000]) {
+        let now = 1800000000000;
+        Date.now = () => now;
+        const gate = deferred();
+        notifications.getPermissionsAsync = () => gate.promise;
+        const count = scheduled.length;
+        const pending = n.scheduleNotification('task', 'body', new Date(now + 1000));
+        assert.equal(scheduled.length, count);
+        now += elapsed;
+        gate.resolve({ status: 'granted' });
+        assert.equal((await bounded(pending)).notificationId, undefined);
+        assert.equal(scheduled.length, count, 'CR-02: прошедшая/равная now дата не передаётся в SDK');
+      }
+      console.log('CR02_PERMISSION_TIME_OK');
+    } finally { Date.now = realNow; notifications.getPermissionsAsync = getPermissions; }
   } finally { Module._load = originalLoad; }
 }
 async function checkCompletion() {
   const originalLoad = Module._load;
   const path = require('node:path');
   let records = [], writes = 0, failSchedule = false, failCancel = false;
+  let rescheduleDuringTest;
+  let cancelDuringTest;
   const events = [], alerts = [];
   const asyncStorage = {
     async getItem() { return JSON.stringify(records); },
     async setItem(key, value) { records = JSON.parse(value); writes++; events.push('save'); },
   };
   const notificationFns = {
-    async cancelNotification(id) { events.push('cancel:' + id); if (failCancel) throw new Error('cancel'); },
+    async cancelNotification(id) {
+      events.push('cancel:' + id);
+      if (cancelDuringTest) await cancelDuringTest(id);
+      if (failCancel) throw new Error('cancel');
+    },
     async rescheduleNextNotification(todo) {
+      if (rescheduleDuringTest) return rescheduleDuringTest(todo);
       events.push('reschedule');
       if (failSchedule) throw new Error('schedule');
       return { notificationId: todo.reminderDate ? 'next-id' : undefined };
@@ -177,9 +216,181 @@ async function checkCompletion() {
     await checkbox(render({ ...base, isRepeat: false }))();
     assert.equal(records.length, 0);
     console.log('STORAGE_AND_COMPLETION_OK');
+    failCancel = false;
+    // CR-01: одна сессия диалога, одноразовый выбор, отмена и dismiss.
+    for (const extras of [{ isTodoExpired: true }, { isFuture: true }]) {
+      for (const choice of ['Сегодня', 'Дата в задаче']) {
+        const initial = { ...base, nextDate: '2026-11-01' };
+        records = [{ ...initial }]; events.length = 0; alerts.length = 0;
+        const press = checkbox(render(initial, extras));
+        await Promise.all([press(), press()]);
+        assert.equal(alerts.length, 1, 'CR-01: двойной тап открывает только один диалог');
+        const dialog = alerts[0];
+        const selected = dialog[2].find(button => button.text === choice).onPress;
+        const beforeWrites = writes;
+        await selected();
+        const expected = choice === 'Дата в задаче' ? '2026-11-03' : time.toDateKey(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 2));
+        assert.equal(records[0].nextDate, expected);
+        assert.equal(writes, beforeWrites + 1);
+        await selected();
+        await dialog[2].find(button => button.text !== choice && button.text !== 'Отмена').onPress();
+        dialog[3].onDismiss();
+        assert.equal(writes, beforeWrites + 1, 'CR-01: старые callbacks не выполняют задачу повторно');
+        // Следующее намеренное выполнение получает актуальные props.
+        await checkbox(render({ ...records[0] }, extras))();
+        assert.equal(alerts.length, 2);
+        alerts.at(-1)[2].find(button => button.text === 'Отмена').onPress();
+      }
+      for (const dismissKind of ['cancel', 'dismiss']) {
+        records = [{ ...base }]; events.length = 0; alerts.length = 0;
+        const press = checkbox(render(base, extras));
+        const beforeWrites = writes;
+        await press();
+        const dialog = alerts[0];
+        assert.equal(dialog[2][2].style, 'cancel');
+        if (dismissKind === 'cancel') dialog[2][2].onPress();
+        else dialog[3].onDismiss();
+        await dialog[2][0].onPress();
+        await dialog[2][1].onPress();
+        assert.equal(writes, beforeWrites);
+        assert.deepEqual(records, [base]);
+        assert.deepEqual(events, ['alert']);
+        await press();
+        assert.equal(alerts.length, 2, 'CR-01: отмена/dismiss освобождает lock');
+        alerts.at(-1)[3].onDismiss();
+      }
+    }
+    records = [{ ...base }]; alerts.length = 0;
+    const waitingPress = checkbox(render(base, { isTodoExpired: true }));
+    await waitingPress();
+    const waitingDialog = alerts[0];
+    const enteredChoice = deferred(), releaseChoice = deferred();
+    rescheduleDuringTest = async () => {
+      enteredChoice.resolve(); await releaseChoice.promise;
+      return { notificationId: undefined };
+    };
+    try {
+      const beforeChoiceWrites = writes;
+      const completing = waitingDialog[2][1].onPress();
+      await bounded(enteredChoice.promise);
+      await waitingPress();
+      await waitingDialog[2][0].onPress();
+      waitingDialog[3].onDismiss();
+      await waitingPress();
+      assert.equal(alerts.length, 1, 'CR-01: lock удерживается до завершения операции');
+      assert.equal(writes, beforeChoiceWrites);
+      releaseChoice.resolve();
+      await bounded(completing);
+      assert.equal(writes, beforeChoiceWrites + 1);
+    } finally { releaseChoice.resolve(); rescheduleDuringTest = undefined; }
+    console.log('CR01_DIALOG_ONCE_OK');
+
+    // CR-03: устаревший тип или дата не разрешают ни удаление, ни перенос.
+    for (const isRepeat of [false, true]) {
+      for (const change of [{ isRepeat: !isRepeat }, { nextDate: '2026-12-17' }]) {
+        const prop = { ...base, isRepeat };
+        const current = { ...prop, ...change };
+        records = [{ ...current }]; events.length = 0;
+        const beforeWrites = writes;
+        await checkbox(render(prop))();
+        assert.deepEqual(records, [current]);
+        assert.equal(writes, beforeWrites);
+        assert.deepEqual(events, ['refresh', 'alert']);
+        assert.equal(alerts.at(-1)[0], 'Задача изменена');
+        await checkbox(render({ ...current }))();
+        assert.equal(writes, beforeWrites + 1, 'CR-03: свежие props позволяют новое выполнение');
+        if (!current.isRepeat) assert.equal(records.length, 0);
+        else assert.equal(records.length, 1);
+      }
+    }
+    // Тип меняется уже после открытия диалога.
+    records = [{ ...base }];
+    await checkbox(render(base, { isTodoExpired: true }))();
+    const staleDialog = alerts.at(-1);
+    records[0].isRepeat = false;
+    const beforeStaleChoice = writes;
+    await staleDialog[2][1].onPress();
+    assert.equal(writes, beforeStaleChoice);
+    assert.equal(records[0].isRepeat, false);
+    // CR-03: одноразовая задача изменена, пока отменяется её уведомление.
+    for (const change of [{ nextDate: '2026-12-18' }, { reminderDate: '2026-12-18T15:00:00.000Z' }]) {
+      const singleTask = { ...base, isRepeat: false, notificationId: 'single-old', reminderDate: '2026-11-07T15:00:00.000Z' };
+      records = [{ ...singleTask }]; events.length = 0;
+      const enteredCancel = deferred(), releaseCancel = deferred();
+      cancelDuringTest = async () => { enteredCancel.resolve(); await releaseCancel.promise; };
+      try {
+        const beforeCancelWrites = writes;
+        const completing = checkbox(render(singleTask))();
+        await bounded(enteredCancel.promise);
+        records = [{ ...singleTask, ...change }];
+        const edited = structuredClone(records);
+        releaseCancel.resolve();
+        await bounded(completing);
+        assert.deepEqual(records, edited, 'CR-03: актуальная одноразовая задача не удаляется после await');
+        assert.equal(writes, beforeCancelWrites);
+        assert.deepEqual(events, ['cancel:single-old', 'refresh', 'alert']);
+        assert.equal(alerts.at(-1)[0], 'Задача изменена');
+      } finally { releaseCancel.resolve(); cancelDuringTest = undefined; }
+    }
+    console.log('CR03_STALE_TASK_OK');
+
+    // CR-04: реальные getTodo/patchTodo; изменение записи во время await SDK.
+    const changes = [
+      ['тип', { isRepeat: false }], ['дата', { nextDate: '2026-12-17' }],
+      ['частота', { repeatFrequency: 7 }], ['напоминание', { reminderDate: undefined }],
+      ['id уведомления', { notificationId: 'edited-id' }],
+      ['исходный сценарий', { repeatFrequency: 7, reminderDate: undefined, notificationId: undefined }],
+      ['удаление', null], ['несвязанные поля', { title: 'edited', description: 'fresh', size: 2 }],
+    ];
+    try {
+      for (const [label, change] of changes) {
+        const initial = { ...base, nextDate: '2026-11-07', reminderDate: '2026-11-07T15:00:00.000Z', notificationId: 'old-id' };
+        records = [{ ...initial }]; events.length = 0;
+        const entered = deferred(), release = deferred();
+        rescheduleDuringTest = async () => {
+          events.push('reschedule'); entered.resolve();
+          await release.promise;
+          return { notificationId: 'orphan-id' };
+        };
+        const beforeWrites = writes;
+        const operation = checkbox(render(initial))();
+        await bounded(entered.promise);
+        records = change === null ? [] : [{ ...initial, ...change }];
+        const edited = structuredClone(records);
+        release.resolve();
+        await bounded(operation);
+        if (label === 'несвязанные поля') {
+          assert.equal(writes, beforeWrites + 1);
+          assert.equal(records[0].title, 'edited');
+          assert.equal(records[0].description, 'fresh');
+          assert.equal(records[0].size, 2);
+          assert.equal(records[0].nextDate, '2026-11-09');
+          assert.equal(records[0].notificationId, 'orphan-id');
+          assert.ok(!events.includes('cancel:orphan-id'));
+        } else {
+          assert.deepEqual(records, edited, 'CR-04: не перезаписывать свежие поля: ' + label);
+          assert.equal(writes, beforeWrites);
+          assert.deepEqual(events, ['reschedule', 'cancel:orphan-id', 'refresh', 'alert']);
+          assert.equal(alerts.at(-1)[0], 'Задача изменена');
+        }
+      }
+      // Контракт canPatch проверяется на реально прочитанной записи, не на props.
+      records = [{ ...base, repeatFrequency: 7 }];
+      const beforeGuard = writes;
+      let observed;
+      const rejected = await storage.patchTodo(base.id, { nextDate: '2026-12-20' }, current => {
+        observed = current.repeatFrequency;
+        return current.repeatFrequency === 2;
+      });
+      assert.equal(observed, 7);
+      assert.equal(rejected, undefined);
+      assert.equal(writes, beforeGuard);
+      assert.equal(records[0].nextDate, base.nextDate);
+      console.log('CR04_CONFLICT_ORPHAN_OK');
+    } finally { rescheduleDuringTest = undefined; }
   } finally { Module._load = originalLoad; }
 }
-function checkForm() {
+async function checkForm() {
   const originalLoad = Module._load;
   const path = require('node:path');
   let slots = [], cursor = 0, effects = [], deps = [], saved = [], closed = 0;
@@ -256,6 +467,38 @@ function checkForm() {
     toggle()(false); toggle()(true); save();
     assert.ok(new Date(saved[0].reminderDate) > new Date());
     console.log('FORM_VALIDATION_OK');
+    // CR-06: независимая правка просроченной задачи не требует переноса даты.
+    const overdue = { ...edit, nextDate: time.toDateKey(past) };
+    reset(overdue);
+    find(node => node.type === 'Input' && node.props.placeholder === 'Добавьте детали...').props.onChangeText('overdue edit');
+    await save();
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].nextDate, overdue.nextDate);
+    assert.equal(saved[0].reminderDate, overdue.reminderDate);
+    assert.equal(saved[0].description, 'overdue edit');
+    assert.equal(closed, 1);
+    reset(overdue); toggle()(false); await save();
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].nextDate, overdue.nextDate);
+    assert.equal(saved[0].reminderDate, undefined);
+
+    reset(overdue);
+    reminderButton().props.onPress();
+    find(node => node.type === 'Picker' && node.props.onChange.name === 'onRemindDateChange').props.onChange({ type: 'set' }, new Date(past.getTime() - 86400000));
+    await save();
+    assert.equal(saved.length, 0); assert.equal(closed, 0);
+    assert.ok(find(node => node.type === 'Text' && node.props.children === 'Время напоминания уже прошло'));
+
+    for (const editData of [null, overdue]) {
+      reset(editData);
+      if (!editData) find(node => node.type === 'Input' && node.props.placeholder === 'Что нужно сделать?').props.onChangeText('new');
+      find(node => node.type === 'Button' && node.props.onPress?.toString().includes('setShowDatepicker')).props.onPress();
+      find(node => node.type === 'Picker' && node.props.onChange.name === 'onNextDateChange').props.onChange({ type: 'set' }, new Date(past.getTime() - 86400000));
+      await save();
+      assert.equal(saved.length, 0); assert.equal(closed, 0);
+      assert.ok(find(node => node.type === 'Text' && node.props.children === 'Дата не может быть в прошлом'));
+    }
+    console.log('CR06_OVERDUE_EDIT_OK');
   } finally { Module._load = originalLoad; }
 }
 checkNotifications().then(checkCompletion).then(checkForm).catch(error => { console.error(error); process.exitCode = 1; });

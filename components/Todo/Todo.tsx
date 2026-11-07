@@ -64,7 +64,8 @@ export default function Todo({
                 }
             }
             const latest = await getTodo(current.id);
-            if (!latest || latest.isRepeat || latest.notificationId !== current.notificationId) {
+            if (!latest || latest.isRepeat || latest.nextDate !== current.nextDate ||
+                latest.reminderDate !== current.reminderDate || latest.notificationId !== current.notificationId) {
                 await changedTask();
                 return;
             }
