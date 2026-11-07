@@ -1,5 +1,5 @@
-import { addDays, format } from "date-fns";
-import { parseTime, formatTime } from "./time";
+import { addDays } from "date-fns";
+import { parseTime, formatTime, parseDateKey, toDateKey } from "./time";
 
 /**
  * Вычисляет следующую дату повторения задачи по базовой дате и частоте
@@ -9,7 +9,7 @@ import { parseTime, formatTime } from "./time";
  * двойного сдвига (см. .planning/debug/recurring-notification-stops-after-complete.md).
  */
 export function nextRecurrenceDate(base: Date, repeatFrequency: number): string {
-    return format(addDays(base, repeatFrequency), "yyyy-MM-dd");
+    return toDateKey(addDays(base, repeatFrequency));
 }
 
 /**
@@ -27,7 +27,7 @@ export function nextReminderIso(
     }
 
     const reminderTime = formatTime(new Date(currentReminderDate));
-    const finalDateTime = new Date(nextDate);
+    const finalDateTime = parseDateKey(nextDate);
     const parsed = parseTime(reminderTime);
     if (parsed) {
         finalDateTime.setHours(parsed.getHours());

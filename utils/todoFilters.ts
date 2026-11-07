@@ -1,14 +1,15 @@
-import { isAfter, isBefore, isSameDay, parse, startOfDay } from "date-fns";
+import { isAfter, isBefore, isSameDay, startOfDay } from "date-fns";
 import { TodoItem } from "../types/todo";
+import { parseDateKey } from "./time";
 
 export const isExpired = (todo: TodoItem, now: Date = new Date()): boolean =>
-  isBefore(parse(todo.nextDate, "yyyy-MM-dd", new Date()), startOfDay(now));
+  isBefore(parseDateKey(todo.nextDate), startOfDay(now));
 
 export const isToday = (todo: TodoItem, selectedDate: Date): boolean =>
-  isSameDay(parse(todo.nextDate, "yyyy-MM-dd", new Date()), selectedDate);
+  isSameDay(parseDateKey(todo.nextDate), selectedDate);
 
 export const isFuture = (todo: TodoItem, now: Date = new Date()): boolean =>
-  isAfter(parse(todo.nextDate, "yyyy-MM-dd", new Date()), startOfDay(now));
+  isAfter(parseDateKey(todo.nextDate), startOfDay(now));
 
 export const sortByDate = (todos: TodoItem[]): TodoItem[] =>
   [...todos].sort((a, b) => a.nextDate.localeCompare(b.nextDate));
