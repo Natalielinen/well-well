@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { TodoItem } from "../../types/todo";
 import { styles } from "./styles";
+import { toDateKey } from "../../utils/time";
 
 const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -27,11 +28,8 @@ export default function WeekStrip({
     startOfWeek.setHours(0, 0, 0, 0);
 
     const hasTasksOnDate = (date: Date) => {
-        const dateStr = date.toISOString().split("T")[0];
-        return tasks.some((t) => {
-            const taskDate = new Date(t.nextDate).toISOString().split("T")[0];
-            return taskDate === dateStr;
-        });
+        const dateStr = toDateKey(date);
+        return tasks.some((t) => t.nextDate === dateStr);
     };
 
     const isSameDay = (d1: Date, d2: Date) => {

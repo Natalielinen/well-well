@@ -1,3 +1,10 @@
+import { format, parse } from "date-fns";
+
+export const parseDateKey = (value: string): Date =>
+  parse(value, "yyyy-MM-dd", new Date());
+
+export const toDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
+
 export function parseTime(str: string): Date | null {
   const match = str.match(/^(\d{2}):(\d{2})$/);
   if (!match) return null;
