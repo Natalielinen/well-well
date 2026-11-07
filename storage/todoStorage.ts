@@ -3,6 +3,22 @@ import { TodoItem } from "../types/todo";
 
 const TODOS_KEY = "TODOS";
 
+export const getTodo = async (id: number): Promise<TodoItem | undefined> =>
+  (await loadTodos()).find((todo) => todo.id === id);
+
+export const patchTodo = async (
+  id: number,
+  partial: Partial<TodoItem>,
+): Promise<TodoItem | undefined> => {
+  const todos = await loadTodos();
+  const index = todos.findIndex((todo) => todo.id === id);
+  if (index === -1) return undefined;
+  const updated = { ...todos[index], ...partial, id };
+  todos[index] = updated;
+  await saveTodos(todos);
+  return updated;
+};
+
 export const saveTodos = async (todos: TodoItem[]) => {
   try {
     await AsyncStorage.setItem(TODOS_KEY, JSON.stringify(todos));

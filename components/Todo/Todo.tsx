@@ -1,11 +1,12 @@
 import { View, Text, Alert, TouchableOpacity } from "react-native";
+import { useRef } from "react";
 import { TodoItem } from "../../types/todo";
 import { styles } from "./styles";
 import { sizeOptions, sizes } from "../../constants/todo";
-import { format, formatDate } from "date-fns";
-import { formatTime } from "../../utils/time";
+import { format } from "date-fns";
+import { formatTime, parseDateKey, toDateKey } from "../../utils/time";
 import { ru } from "date-fns/locale";
-import { removeTodo, updateTodo } from "../../storage/todoStorage";
+import { getTodo, patchTodo, removeTodo } from "../../storage/todoStorage";
 import { nextRecurrenceDate, nextReminderIso } from "../../utils/recurrence";
 import { colors } from "../../themes/colors";
 import {
@@ -17,7 +18,7 @@ import {
     Bell,
 } from "lucide-react-native";
 import { useNotifications } from "../../hooks/useNotifications";
-import { rescheduleNextNotification } from "../../hooks/useNotifications";
+import { notifyReminderFailed, rescheduleNextNotification } from "../../hooks/useNotifications";
 
 type TodoProps = {
     todo: TodoItem;
@@ -33,16 +34,79 @@ export default function Todo({
     getAllTodos,
     openEditModal,
 }: TodoProps) {
-    const { cancelNotification, scheduleNotification } = useNotifications();
+    const { cancelNotification } = useNotifications();
+    const isCompletingRef = useRef(false);
 
-    const handleCompleteTask = async (lastUpdated: string, nextDate: string, reminderDate?: string) => {
-        const updatedTodo = { ...todo, lastUpdated, nextDate, reminderDate };
-        const { notificationId } = await rescheduleNextNotification(updatedTodo);
-        await updateTodo(todo.id, {
-            ...updatedTodo,
-            notificationId,
-        });
-    }
+    const completeSingleTask = async () => {
+        if (isCompletingRef.current) return;
+        isCompletingRef.current = true;
+        try {
+            const current = await getTodo(todo.id);
+            if (!current) {
+                await getAllTodos();
+                return;
+            }
+            if (current.notificationId) {
+                try {
+                    await cancelNotification(current.notificationId);
+                } catch {
+                    // Неизвестное или уже сработавшее уведомление не блокирует выполнение.
+                }
+            }
+            await removeTodo(current.id);
+            await getAllTodos();
+            showAlert("Успешно", "Выполнена не повторяющаяся задача. Задача удалена из списка дел");
+        } catch {
+            Alert.alert("Ошибка", "Не удалось завершить задачу. Обновите список и попробуйте снова");
+        } finally {
+            isCompletingRef.current = false;
+        }
+    };
+
+    const handleCompleteTask = async (base: "today" | "taskDate"): Promise<string | undefined> => {
+        if (isCompletingRef.current) return;
+        isCompletingRef.current = true;
+        try {
+            const current = await getTodo(todo.id);
+            if (!current) {
+                await getAllTodos();
+                return;
+            }
+            const nextDate = nextRecurrenceDate(
+                base === "today" ? new Date() : parseDateKey(current.nextDate),
+                current.repeatFrequency,
+            );
+            let reminderDate = nextReminderIso(nextDate, current.reminderDate);
+            let notificationId: string | undefined;
+            let reminderFailed = false;
+            try {
+                ({ notificationId } = await rescheduleNextNotification({ ...current, nextDate, reminderDate }));
+            } catch {
+                reminderDate = undefined;
+                notificationId = undefined;
+                reminderFailed = true;
+            }
+            const updated = await patchTodo(current.id, {
+                lastUpdated: toDateKey(new Date()), nextDate, reminderDate, notificationId,
+            });
+            // Если запись удалили во время ожидания системного API, не оставляем уведомление-сироту.
+            if (!updated && notificationId) {
+                try { await cancelNotification(notificationId); } catch { /* Отмена по возможности. */ }
+            }
+            await getAllTodos();
+            if (!updated) return;
+            if (reminderFailed) {
+                await notifyReminderFailed();
+                // Не перекрываем сообщение об ошибке вторым Alert об успешном выполнении.
+                return;
+            }
+            return nextDate;
+        } catch {
+            Alert.alert("Ошибка", "Не удалось завершить задачу. Обновите список и попробуйте снова");
+        } finally {
+            isCompletingRef.current = false;
+        }
+    };
 
     const onTaskDelete = async () => {
         if (todo.notificationId) {
@@ -56,7 +120,6 @@ export default function Todo({
         Alert.alert(title, message, [
             {
                 text: "OK",
-                onPress: getAllTodos,
             },
         ]);
     };
@@ -71,31 +134,18 @@ export default function Todo({
                 {
                     text: "Сегодня",
                     onPress: async () => {
-                        const newNextDate = nextRecurrenceDate(new Date(), todo.repeatFrequency);
-
-                        await handleCompleteTask(
-                            format(new Date(), "yyyy-MM-dd"),
-                            newNextDate,
-                            nextReminderIso(newNextDate, todo.reminderDate)
-                        )
-
-                        await getAllTodos();
+                        await handleCompleteTask("today");
                     },
                 },
                 {
                     text: "Дата в задаче",
                     onPress: async () => {
-                        const newNextDate = nextRecurrenceDate(new Date(todo.nextDate), todo.repeatFrequency);
-
-                        await handleCompleteTask(
-                            format(new Date(), "yyyy-MM-dd"),
-                            newNextDate,
-                            nextReminderIso(newNextDate, todo.reminderDate)
-                        );
-                        await getAllTodos();
+                        await handleCompleteTask("taskDate");
                     },
                 },
+                { text: "Отмена", style: "cancel" },
             ],
+            { cancelable: true },
         );
     };
 
@@ -114,29 +164,17 @@ export default function Todo({
 
     const onTaskComplete = async () => {
         if (!todo.isRepeat) {
-            await removeTodo(todo.id);
-            showAlert(
-                "Успешно",
-                "Выполнена не повторяющаяся задача. Задача удалена из списка дел",
-            );
+            await completeSingleTask();
             // Повторяющаяся задача, дата не наступила
         } else if (todo.isRepeat && isFuture) {
             showAlertForExpiredTask(true);
             // Повторяющаяся не просроченная задача
         } else if (todo.isRepeat && !isTodoExpired) {
-            const newNextDate = nextRecurrenceDate(
-                new Date(todo.nextDate),
-                todo.repeatFrequency,
-            );
-
-            await handleCompleteTask(
-                format(new Date(), "yyyy-MM-dd"),
-                newNextDate,
-                nextReminderIso(newNextDate, todo.reminderDate)
-            )
+            const nextDate = await handleCompleteTask("taskDate");
+            if (!nextDate) return;
             showAlert(
                 "Успешно",
-                `Выполнена повторяющаяся задача. Дата следующего выполнения: ${format(new Date(newNextDate), "d LLL yyyy", { locale: ru })}`,
+                `Выполнена повторяющаяся задача. Дата следующего выполнения: ${format(parseDateKey(nextDate), "d LLL yyyy", { locale: ru })}`,
             );
         } else if (todo.isRepeat && isTodoExpired) {
             showAlertForExpiredTask(false);
@@ -239,7 +277,7 @@ export default function Todo({
 
             <View style={styles.footer}>
                 <Text style={styles.date}>
-                    {new Date(todo.nextDate).toLocaleDateString("ru-RU", {
+                    {parseDateKey(todo.nextDate).toLocaleDateString("ru-RU", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
