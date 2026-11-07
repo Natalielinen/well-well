@@ -9,10 +9,11 @@ export const getTodo = async (id: number): Promise<TodoItem | undefined> =>
 export const patchTodo = async (
   id: number,
   partial: Partial<TodoItem>,
+  canPatch: (current: TodoItem) => boolean = () => true,
 ): Promise<TodoItem | undefined> => {
   const todos = await loadTodos();
   const index = todos.findIndex((todo) => todo.id === id);
-  if (index === -1) return undefined;
+  if (index === -1 || !canPatch(todos[index])) return undefined;
   const updated = { ...todos[index], ...partial, id };
   todos[index] = updated;
   await saveTodos(todos);

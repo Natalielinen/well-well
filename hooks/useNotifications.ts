@@ -28,6 +28,9 @@ export const scheduleNotification = async (
   }
 
   const { status } = await Notifications.getPermissionsAsync();
+  if (date.getTime() <= Date.now()) {
+    return { notificationId: undefined };
+  }
   if (status !== "granted") {
     throw new Error("Notification permission not granted");
   }

@@ -36,6 +36,12 @@ export default function Todo({
 }: TodoProps) {
     const { cancelNotification } = useNotifications();
     const isCompletingRef = useRef(false);
+    const isChoosingDateRef = useRef(false);
+
+    const changedTask = async () => {
+        await getAllTodos();
+        Alert.alert("Задача изменена", "Проверьте актуальные данные и повторите выполнение");
+    };
 
     const completeSingleTask = async () => {
         if (isCompletingRef.current) return;
@@ -46,12 +52,21 @@ export default function Todo({
                 await getAllTodos();
                 return;
             }
+            if (current.isRepeat || current.nextDate !== todo.nextDate) {
+                await changedTask();
+                return;
+            }
             if (current.notificationId) {
                 try {
                     await cancelNotification(current.notificationId);
                 } catch {
                     // Неизвестное или уже сработавшее уведомление не блокирует выполнение.
                 }
+            }
+            const latest = await getTodo(current.id);
+            if (!latest || latest.isRepeat || latest.notificationId !== current.notificationId) {
+                await changedTask();
+                return;
             }
             await removeTodo(current.id);
             await getAllTodos();
@@ -72,6 +87,10 @@ export default function Todo({
                 await getAllTodos();
                 return;
             }
+            if (!current.isRepeat || current.nextDate !== todo.nextDate) {
+                await changedTask();
+                return;
+            }
             const nextDate = nextRecurrenceDate(
                 base === "today" ? new Date() : parseDateKey(current.nextDate),
                 current.repeatFrequency,
@@ -86,15 +105,24 @@ export default function Todo({
                 notificationId = undefined;
                 reminderFailed = true;
             }
+            const unchanged = (latest: TodoItem) =>
+                latest.isRepeat === current.isRepeat &&
+                latest.nextDate === current.nextDate &&
+                latest.repeatFrequency === current.repeatFrequency &&
+                latest.reminderDate === current.reminderDate &&
+                latest.notificationId === current.notificationId;
             const updated = await patchTodo(current.id, {
                 lastUpdated: toDateKey(new Date()), nextDate, reminderDate, notificationId,
-            });
+            }, unchanged);
             // Если запись удалили во время ожидания системного API, не оставляем уведомление-сироту.
             if (!updated && notificationId) {
                 try { await cancelNotification(notificationId); } catch { /* Отмена по возможности. */ }
             }
             await getAllTodos();
-            if (!updated) return;
+            if (!updated) {
+                Alert.alert("Задача изменена", "Проверьте актуальные данные и повторите выполнение");
+                return;
+            }
             if (reminderFailed) {
                 await notifyReminderFailed();
                 // Не перекрываем сообщение об ошибке вторым Alert об успешном выполнении.
@@ -125,6 +153,19 @@ export default function Todo({
     };
 
     const showAlertForExpiredTask = (isFuture: boolean) => {
+        if (isChoosingDateRef.current || isCompletingRef.current) return;
+        isChoosingDateRef.current = true;
+        let settled = false;
+        const dismiss = () => {
+            if (settled) return;
+            settled = true;
+            isChoosingDateRef.current = false;
+        };
+        const choose = async (base: "today" | "taskDate") => {
+            if (settled) return;
+            dismiss();
+            await handleCompleteTask(base);
+        };
         Alert.alert(
             "Внимание!",
             isFuture
@@ -134,18 +175,18 @@ export default function Todo({
                 {
                     text: "Сегодня",
                     onPress: async () => {
-                        await handleCompleteTask("today");
+                        await choose("today");
                     },
                 },
                 {
                     text: "Дата в задаче",
                     onPress: async () => {
-                        await handleCompleteTask("taskDate");
+                        await choose("taskDate");
                     },
                 },
-                { text: "Отмена", style: "cancel" },
+                { text: "Отмена", style: "cancel", onPress: dismiss },
             ],
-            { cancelable: true },
+            { cancelable: true, onDismiss: dismiss },
         );
     };
 
@@ -163,6 +204,7 @@ export default function Todo({
     };
 
     const onTaskComplete = async () => {
+        if (isCompletingRef.current || isChoosingDateRef.current) return;
         if (!todo.isRepeat) {
             await completeSingleTask();
             // Повторяющаяся задача, дата не наступила

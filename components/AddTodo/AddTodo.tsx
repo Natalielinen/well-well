@@ -171,7 +171,8 @@ export default function AddTodo({
             return;
         }
 
-        if (isBefore(nextDate, startOfDay(new Date()))) {
+        if (isBefore(nextDate, startOfDay(new Date())) &&
+            (!editData || toDateKey(nextDate) !== editData.nextDate)) {
             setError({
                 ...error,
                 minDate: "Дата не может быть в прошлом",
