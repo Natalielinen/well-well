@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
-import { Platform } from "react-native";
-import { formatTime } from "../utils/time";
+import { Alert, Platform } from "react-native";
 import { TodoItem } from "../types/todo";
 
 // Как показывать уведомление когда приложение открыто
@@ -16,19 +15,22 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export const getEffectiveReminderDate = (date: Date): Date => {
-  if (date <= new Date()) {
-    return new Date(Date.now() + 60000);
-  }
-  return date;
-};
-
 export const scheduleNotification = async (
   title: string,
   body: string,
   date: Date,
-): Promise<{ notificationId: string | undefined; adjustedDate: Date }> => {
-  const effectiveDate = getEffectiveReminderDate(date);
+): Promise<{ notificationId: string | undefined }> => {
+  if (date.getTime() <= Date.now()) {
+    return { notificationId: undefined };
+  }
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error("Invalid reminder date");
+  }
+
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status !== "granted") {
+    throw new Error("Notification permission not granted");
+  }
 
   try {
     const id = await Notifications.scheduleNotificationAsync({
@@ -36,16 +38,16 @@ export const scheduleNotification = async (
         title: `📋 ${title}`,
         body,
         sound: true,
-        data: { date: effectiveDate.toISOString() },
+        data: { date: date.toISOString() },
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: effectiveDate,
+        date,
         ...(Platform.OS === "android" && { exact: true }),
       },
     });
 
-    return { notificationId: id, adjustedDate: effectiveDate };
+    return { notificationId: id };
   } catch (e) {
     throw e;
   }
@@ -55,13 +57,30 @@ export const cancelNotification = async (notificationId: string) => {
   await Notifications.cancelScheduledNotificationAsync(notificationId);
 };
 
-export const rescheduleNextNotification = async (todo: TodoItem): Promise<{ notificationId: string | undefined; adjustedDate: Date | undefined }> => {
+export const notifyReminderFailed = async (): Promise<void> => {
+  let denied = false;
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    denied = status !== "granted";
+  } catch {
+    // Если причина неизвестна, показываем общее сообщение.
+  }
+  Alert.alert("Ошибка", denied
+    ? "Задача сохранена. Напоминание не установлено: разрешите уведомления в настройках"
+    : "Задача сохранена, но напоминание не установлено. Попробуйте задать его ещё раз");
+};
+
+export const rescheduleNextNotification = async (todo: TodoItem): Promise<{ notificationId: string | undefined }> => {
   if (todo.notificationId) {
-    await cancelNotification(todo.notificationId);
+    try {
+      await cancelNotification(todo.notificationId);
+    } catch {
+      // Уже сработавшее уведомление не должно блокировать выполнение задачи.
+    }
   }
 
   if (!todo.reminderDate) {
-    return { notificationId: undefined, adjustedDate: undefined };
+    return { notificationId: undefined };
   }
 
   // reminderDate уже указывает на следующее выполнение (её вычислил вызывающий
@@ -69,11 +88,7 @@ export const rescheduleNextNotification = async (todo: TodoItem): Promise<{ noti
   // уезжает на repeatFrequency вперёд и накапливает сдвиг при каждом выполнении.
   const nextDate = new Date(todo.reminderDate);
 
-  const effectiveDate = getEffectiveReminderDate(nextDate);
-
-  const { notificationId } = await scheduleNotification(todo.title, todo.description || "Напоминание о задаче", effectiveDate);
-
-  return { notificationId, adjustedDate: effectiveDate };
+  return scheduleNotification(todo.title, todo.description || "Напоминание о задаче", nextDate);
 };
 
 export function useNotifications() {

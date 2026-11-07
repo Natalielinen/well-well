@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 import { TodoItem } from "../types/todo";
 import { addTodo, loadTodos, updateTodo } from "../storage/todoStorage";
-import { useNotifications } from "./useNotifications";
+import { notifyReminderFailed, useNotifications } from "./useNotifications";
 
 export function useTodos() {
   const [allTodos, setAllTodos] = useState<TodoItem[]>([]);
@@ -39,26 +39,29 @@ export function useTodos() {
   }, []);
 
   const onAddTodo = async (newTask: TodoItem) => {
-    let taskToSave = { ...newTask };
+    const taskToSave = { ...newTask, notificationId: undefined as string | undefined };
+    let reminderFailed = false;
 
     if (newTask.reminderDate) {
       const reminderDate = new Date(newTask.reminderDate);
 
       try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
+        const { notificationId } = await scheduleNotification(
           newTask.title,
           newTask.description || "Напоминание о задаче",
           reminderDate,
         );
         taskToSave.notificationId = notificationId;
-        taskToSave.reminderDate = adjustedDate.toISOString();
       } catch (e) {
-        Alert.alert("Ошибка", "Не удалось запланировать уведомление");
+        taskToSave.reminderDate = undefined;
+        taskToSave.notificationId = undefined;
+        reminderFailed = true;
       }
     }
 
     await addTodo(taskToSave);
     setAllTodos((prev) => [taskToSave, ...prev]);
+    if (reminderFailed) await notifyReminderFailed();
   };
 
   const onUpdateTodo = async (id: number, updatedTodo: TodoItem) => {
@@ -69,10 +72,11 @@ export function useTodos() {
     }
 
     let taskToSave: TodoItem = { ...updatedTodo, notificationId: undefined };
+    let reminderFailed = false;
 
     if (updatedTodo.reminderDate) {
       try {
-        const { notificationId, adjustedDate } = await scheduleNotification(
+        const { notificationId } = await scheduleNotification(
           updatedTodo.title,
           updatedTodo.description || "Напоминание о задаче",
           new Date(updatedTodo.reminderDate),
@@ -81,14 +85,16 @@ export function useTodos() {
         if (notificationId) {
           taskToSave.notificationId = notificationId;
         }
-        taskToSave.reminderDate = adjustedDate.toISOString();
       } catch (e) {
-        Alert.alert("Ошибка", "Не удалось обновить уведомление");
+        taskToSave.reminderDate = undefined;
+        taskToSave.notificationId = undefined;
+        reminderFailed = true;
       }
     }
 
     await updateTodo(id, taskToSave);
     await getAllTodos();
+    if (reminderFailed) await notifyReminderFailed();
   };
 
   return { allTodos, getAllTodos, onAddTodo, onUpdateTodo };

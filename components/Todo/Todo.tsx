@@ -37,11 +37,10 @@ export default function Todo({
 
     const handleCompleteTask = async (lastUpdated: string, nextDate: string, reminderDate?: string) => {
         const updatedTodo = { ...todo, lastUpdated, nextDate, reminderDate };
-        const { notificationId, adjustedDate } = await rescheduleNextNotification(updatedTodo);
+        const { notificationId } = await rescheduleNextNotification(updatedTodo);
         await updateTodo(todo.id, {
             ...updatedTodo,
-            ...(notificationId && { notificationId }),
-            ...(adjustedDate && { reminderDate: adjustedDate.toISOString() }),
+            notificationId,
         });
     }
 
