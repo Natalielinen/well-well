@@ -13,7 +13,8 @@ import { useEffect, useState } from "react";
 import { colors } from "../../themes/colors";
 import { sizeOptions, isValidSize, isValidRepeatFrequency } from "../../constants/todo";
 import { TodoItem } from "../../types/todo";
-import { format, isBefore, startOfDay } from "date-fns";
+import { isAfter, isBefore, startOfDay } from "date-fns";
+import { defaultReminderDate, parseDateKey, toDateKey } from "../../utils/time";
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 type AddTodoProps = {
@@ -44,6 +45,7 @@ export default function AddTodo({
         title: "",
         repeatFrequency: "",
         minDate: "",
+        remindDate: "",
     });
 
     const [nextDate, setNextDate] = useState(new Date());
@@ -53,17 +55,16 @@ export default function AddTodo({
     const [remindDate, setRemindDate] = useState<Date | null>(null);
     const [showRemindDatepicker, setShowRemindDatepicker] = useState(false);
     const [showRemindTimePicker, setShowRemindTimePicker] = useState(false);
+    const [reminderTouched, setReminderTouched] = useState(false);
 
-    useEffect(() => {
-        if (!editData) {
-            if (showRemindField) {
-                setRemindDate(new Date());
-            } else {
-                setRemindDate(null);
-            }
-        }
-
-    }, [showRemindField]);
+    const onRemindToggle = (enabled: boolean) => {
+        setShowRemindField(enabled);
+        setRemindDate(enabled ? defaultReminderDate(nextDate) : null);
+        setReminderTouched(true);
+        setShowRemindDatepicker(false);
+        setShowRemindTimePicker(false);
+        setError((prev) => ({ ...prev, remindDate: "" }));
+    };
 
     useEffect(() => {
         if (currentDate) {
@@ -78,11 +79,12 @@ export default function AddTodo({
             setIsRepeat(editData.isRepeat);
             setRepeatFrequency(editData.repeatFrequency.toString());
             setSize(editData.size);
-            setNextDate(new Date(editData.nextDate));
+            setNextDate(parseDateKey(editData.nextDate));
             setRemindDate(
                 editData.reminderDate ? new Date(editData.reminderDate) : null,
             );
             setShowRemindField(!!editData.reminderDate);
+            setReminderTouched(false);
         }
     }, [editData]);
 
@@ -95,6 +97,9 @@ export default function AddTodo({
         setNextDate(currentDate ?? new Date());
         setRemindDate(null);
         setShowRemindField(false);
+        setShowRemindDatepicker(false);
+        setShowRemindTimePicker(false);
+        setReminderTouched(false);
     };
 
     const clearErrors = () => {
@@ -102,6 +107,7 @@ export default function AddTodo({
             title: "",
             repeatFrequency: "",
             minDate: "",
+            remindDate: "",
         });
     };
 
@@ -117,29 +123,29 @@ export default function AddTodo({
 
     const onRemindDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
         setShowRemindDatepicker(false);
-        if (!selectedDate) return;
+        if (event.type === "dismissed" || !selectedDate) return;
 
         // Берём текущий remindDate (или new Date()) как основу
         const updated = remindDate ? new Date(remindDate) : new Date();
-        updated.setFullYear(selectedDate.getFullYear());
-        updated.setMonth(selectedDate.getMonth());
-        updated.setDate(selectedDate.getDate());
+        updated.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
 
         setRemindDate(updated);
+        setReminderTouched(true);
+        setError((prev) => ({ ...prev, remindDate: "" }));
         setShowRemindTimePicker(true);
     };
 
     const onRemindTimeChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
         setShowRemindTimePicker(false);
-        if (!selectedTime) return;
+        if (event.type === "dismissed" || !selectedTime) return;
 
         // Берём уже сохранённую дату и добавляем время
         const updated = remindDate ? new Date(remindDate) : new Date();
-        updated.setHours(selectedTime.getHours());
-        updated.setMinutes(selectedTime.getMinutes());
-        updated.setSeconds(0);
+        updated.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
 
         setRemindDate(updated);
+        setReminderTouched(true);
+        setError((prev) => ({ ...prev, remindDate: "" }));
     };
     const onModalClose = () => {
         clearFields();
@@ -189,18 +195,25 @@ export default function AddTodo({
             return;
         }
 
+        const reminderChanged = reminderTouched || !editData?.reminderDate ||
+            remindDate?.getTime() !== new Date(editData.reminderDate).getTime();
+        if (showRemindField && (!remindDate || (reminderChanged && !isAfter(remindDate, new Date())))) {
+            setError({ ...error, remindDate: "Время напоминания уже прошло" });
+            return;
+        }
+
         const id = editData ? editData.id : Date.now();
 
         const newTask: TodoItem = {
             id,
             title,
             description,
-            lastUpdated: format(new Date(), "yyyy-MM-dd"),
+            lastUpdated: toDateKey(new Date()),
             isRepeat,
             repeatFrequency: Number(repeatFrequency),
-            nextDate: format(nextDate, "yyyy-MM-dd"),
+            nextDate: toDateKey(nextDate),
             size,
-            reminderDate: remindDate ? remindDate.toISOString() : undefined,
+            reminderDate: showRemindField && remindDate ? remindDate.toISOString() : undefined,
             notificationId: editData?.notificationId ?? undefined,
         };
 
@@ -338,7 +351,7 @@ export default function AddTodo({
                                 <Text style={styles.toggleLabel}>Напомнить?</Text>
                                 <Switch
                                     value={showRemindField}
-                                    onValueChange={setShowRemindField}
+                                    onValueChange={onRemindToggle}
                                     trackColor={{
                                         false: colors.border,
                                         true: colors.primaryLight,
@@ -364,6 +377,9 @@ export default function AddTodo({
                                             })}
                                         </Text>
                                     </TouchableOpacity>
+                                    {error.remindDate ? (
+                                        <Text style={styles.errorText}>{error.remindDate}</Text>
+                                    ) : null}
                                     {showRemindDatepicker && (
                                         <DateTimePicker
                                             value={remindDate!}

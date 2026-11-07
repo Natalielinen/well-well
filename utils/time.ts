@@ -5,6 +5,13 @@ export const parseDateKey = (value: string): Date =>
 
 export const toDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
 
+export const defaultReminderDate = (taskDate: Date, now: Date = new Date()): Date => {
+  const result = new Date(taskDate);
+  // В 23:xx следующий целый час — полночь следующего дня.
+  result.setHours(now.getHours() + 1, 0, 0, 0);
+  return result;
+};
+
 export function parseTime(str: string): Date | null {
   const match = str.match(/^(\d{2}):(\d{2})$/);
   if (!match) return null;

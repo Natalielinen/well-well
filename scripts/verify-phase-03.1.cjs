@@ -25,6 +25,19 @@ for (const zone of ['Europe/Moscow', 'America/New_York']) {
   assert.equal(filters.isToday({ nextDate: '2026-10-24' }, new Date(2026, 9, 24, 12)), true);
   assert.equal(filters.isToday({ nextDate: '2026-10-24' }, new Date(2026, 9, 25, 0, 30)), false);
   console.log(zone, 'DATEKEY_OK');
+  if (time.defaultReminderDate) {
+    for (const [day, hour, minute, expectedDay, expectedHour] of [
+      [24, 14, 20, 24, 15], [24, 23, 20, 25, 0], [30, 14, 0, 30, 15], [24, 14, 0, 24, 15],
+    ]) {
+      const now = new Date(2026, 9, 24, hour, minute);
+      const result = time.defaultReminderDate(new Date(2026, 9, day), now);
+      assert.equal(result.getDate(), expectedDay);
+      assert.equal(result.getHours(), expectedHour);
+      assert.equal(result.getMinutes(), 0);
+      assert.ok(result > now);
+    }
+    console.log(zone, 'REMINDER_DEFAULT_OK');
+  }
 }
 
 async function checkNotifications() {
@@ -166,4 +179,83 @@ async function checkCompletion() {
     console.log('STORAGE_AND_COMPLETION_OK');
   } finally { Module._load = originalLoad; }
 }
-checkNotifications().then(checkCompletion).catch(error => { console.error(error); process.exitCode = 1; });
+function checkForm() {
+  const originalLoad = Module._load;
+  const path = require('node:path');
+  let slots = [], cursor = 0, effects = [], deps = [], saved = [], closed = 0;
+  const react = {
+    useState(initial) {
+      const index = cursor++;
+      if (!(index in slots)) slots[index] = initial;
+      return [slots[index], value => { slots[index] = typeof value === 'function' ? value(slots[index]) : value; }];
+    },
+    useEffect(fn, dependencies) {
+      const index = cursor++;
+      if (!deps[index] || dependencies.some((value, i) => !Object.is(value, deps[index][i]))) {
+        deps[index] = dependencies; effects.push(fn);
+      }
+    },
+  };
+  Module._load = function(name, parent, main) {
+    if (name === 'react') return react;
+    if (name === 'react-native') return { Platform: {OS: 'android'}, Modal: 'Modal', View: 'View', Text: 'Text', TextInput: 'Input', Switch: 'Switch', TouchableOpacity: 'Button', ScrollView: 'ScrollView' };
+    if (name === 'react/jsx-runtime') return { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) };
+    if (name === './styles') return { styles: {} };
+    if (name === '@react-native-community/datetimepicker') return { __esModule: true, default: 'Picker' };
+    return originalLoad.call(this, name, parent, main);
+  };
+  try {
+    const file = path.resolve(__dirname, '../components/AddTodo/AddTodo.tsx');
+    const formModule = new Module(file, module);
+    formModule.filename = file;
+    formModule.paths = Module._nodeModulePaths(path.dirname(file));
+    formModule._compile(ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
+    }).outputText, file);
+    const AddTodo = formModule.exports.default;
+    let props;
+    const render = () => {
+      cursor = 0; let tree = AddTodo(props);
+      const pending = effects; effects = [];
+      if (pending.length) { pending.forEach(fn => fn()); cursor = 0; tree = AddTodo(props); }
+      return tree;
+    };
+    const flatten = node => !node || typeof node !== 'object' ? [] : [node, ...[node.props?.children].flat(Infinity).flatMap(flatten)];
+    const find = predicate => flatten(render()).find(predicate);
+    const save = () => find(node => node.type === 'Button' && node.props.children?.props?.children === 'Сохранить').props.onPress();
+    const reset = editData => {
+      slots = []; deps = []; effects = []; saved = []; closed = 0;
+      props = { showModal: true, editData, currentDate: new Date(), closeModal: () => { closed++; },
+        setEditData() {}, onAddTodo: task => saved.push(task), onUpdateTodo: (id, task) => saved.push(task) };
+      render();
+    };
+    reset(null);
+    find(node => node.type === 'Input' && node.props.placeholder === 'Что нужно сделать?').props.onChangeText('task');
+    find(node => node.type === 'Switch' && node.props.onValueChange.name === 'onRemindToggle').props.onValueChange(true);
+    const reminderButton = () => find(node => node.type === 'Button' && node.props.onPress?.toString().includes('setShowRemindDatepicker'));
+    reminderButton().props.onPress();
+    const past = new Date(Date.now() - 86400000);
+    find(node => node.type === 'Picker' && node.props.onChange.name === 'onRemindDateChange').props.onChange({type: 'set'}, past);
+    save();
+    assert.equal(saved.length, 0); assert.equal(closed, 0);
+    assert.ok(find(node => node.type === 'Text' && node.props.children === 'Время напоминания уже прошло'));
+    const edit = { id: 1, title: 'old', description: '', isRepeat: true, repeatFrequency: 1, size: 1,
+      nextDate: time.toDateKey(new Date()), reminderDate: past.toISOString() };
+    reset(edit);
+    find(node => node.type === 'Input' && node.props.placeholder === 'Добавьте детали...').props.onChangeText('edited');
+    save();
+    assert.equal(saved.length, 1);
+    assert.equal(saved[0].reminderDate, edit.reminderDate);
+    assert.equal(saved[0].description, 'edited');
+    reset(edit);
+    find(node => node.type === 'Switch' && node.props.onValueChange.name === 'onRemindToggle').props.onValueChange(false);
+    save();
+    assert.equal(saved[0].reminderDate, undefined);
+    reset(edit);
+    const toggle = () => find(node => node.type === 'Switch' && node.props.onValueChange.name === 'onRemindToggle').props.onValueChange;
+    toggle()(false); toggle()(true); save();
+    assert.ok(new Date(saved[0].reminderDate) > new Date());
+    console.log('FORM_VALIDATION_OK');
+  } finally { Module._load = originalLoad; }
+}
+checkNotifications().then(checkCompletion).then(checkForm).catch(error => { console.error(error); process.exitCode = 1; });
