@@ -2,16 +2,16 @@
 gsd_state_version: "1.0"
 milestone: v1.0
 status: in_progress
-stopped_at: Phase 03.1 planned
-last_updated: "2026-10-24T08:05:29.597Z"
-state_head: 1f37441e4f0559d7305bfe1afab1fa5757b48c40
+stopped_at: Phase 03.1 awaits native UAT (human_needed)
+last_updated: "2026-11-21T07:40:25Z"
+state_head: 86e29c4d06e9f8251fce98b0c7ca4f5924c93479
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 19
-  completed_plans: 12
+  completed_plans: 16
 milestone_name: milestone
-current_phase_name: Fix new known bugs (INSERTED)
+current_phase_name: Fix new known bugs
 ---
 
 # STATE
@@ -21,7 +21,7 @@ current_phase_name: Fix new known bugs (INSERTED)
 See: `.planning/PROJECT.md` (updated 2026-07-16)
 
 **Core value:** Надёжное выполнение задач с своевременными уведомлениями
-**Current focus:** Phase 03.1 (Fix new known bugs) спланирована — 4 плана в 2 волнах, готова к выполнению
+**Current focus:** Phase 03.1 — выполнены 4/4 плана, автоматическая верификация завершена; ожидаются пять проверок на устройстве.
 
 ## Progress
 
@@ -30,25 +30,25 @@ See: `.planning/PROJECT.md` (updated 2026-07-16)
 | 1     | Awaiting verification | 3/3   | Executed |
 | 2     | ✓ Complete | 4/4   | 100%     |
 | 3     | ✓ Complete | 3/3   | 100%     |
-| 03.1  | Ready to execute | 0/4   | Planned  |
-| 4     | Ready to execute (после 03.1) | 0/3   | Planned  |
+| 03.1  | Human verification needed | 4/4   | Код и автоматические проверки завершены |
+| 4     | Planned (после UAT и корректировки планов) | 0/3   | Planned  |
 
 ## Next Actions
 
-1. Выполнить Phase 03.1 — `/gsd-execute-phase 03.1` (wave 1: 03.1-01, 03.1-02; wave 2: 03.1-03, 03.1-04).
-2. После 03.1 перепроверить планы Phase 4: 04-02 тестирует `utils/todoFilters.ts`/`utils/recurrence.ts`, а BUGF-06 меняет парсинг дат.
-3. Выполнить Phase 4 (Testing) — `/gsd-execute-phase 4`. Wave 1 (04-01) поднимает jest-expo и первый зелёный тест; на `jest-expo` стоит human-verify checkpoint (сработает даже в yolo). Wave 2 (04-02, 04-03) — параллельно после тулчейна.
-4. Опционально до выполнения: ручной smoke-тест 2 пунктов из 03-VERIFICATION.md (просроченная/будущая повторяющаяся задача; CRUD + баннер после выноса в useTodos).
+1. Провести пять проверок `03.1-UAT.md` на устройстве через `$gsd-verify-work 03.1`. До их результата фаза не отмечается завершённой.
+2. Исправить прежний CR-05 (потеря черновика при отказе хранилища) отдельной задачей; disposition и ограничения описаны в `03.1-REVIEW-DISPOSITION.md`.
+3. Перед Phase 4 перепланировать 04-02 и 04-03: изменена работа с датами, удалены `getEffectiveReminderDate` и `adjustedDate`, добавлены `getTodo`/`patchTodo`. Старый тест переноса на +60 секунд больше не соответствует D-04.
+4. После приёмки и корректировки планов выполнить Phase 4 (Testing) — `$gsd-execute-phase 4`.
 
 ---
 
-*Last updated: 2026-10-24 after planning Phase 03.1*
+*Обновлено: 2026-11-21 после автоматической верификации Phase 03.1.*
 
 ## Session
 
 **Last session:** 2026-10-24T07:20:58.276Z
-**Stopped at:** Phase 03.1 planned (4 плана, готова к выполнению)
-**Resume file:** .planning/phases/03.1-fix-new-known-bugs/03.1-01-PLAN.md
+**Stopped at:** Phase 03.1 awaits native UAT (human_needed)
+**Resume file:** .planning/phases/03.1-fix-new-known-bugs/03.1-UAT.md
 
 ## Performance Metrics
 

@@ -4,9 +4,9 @@
   "milestone": "v1.0",
   "phases": [],
   "next": {
-    "command": "/gsd-progress --next",
-    "label": "Advance to the next step",
-    "reason": "executing"
+    "command": "$gsd-verify-work 03.1",
+    "label": "Complete native UAT for phase 03.1",
+    "reason": "human_needed"
   },
-  "updated_at": "2026-10-24T08:05:29.643Z"
+  "updated_at": "2026-11-21T07:40:25Z"
 }

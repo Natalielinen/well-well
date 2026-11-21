@@ -70,12 +70,12 @@
 | BUGF-02 | Phase 2 | Complete |
 | BUGF-03 | Phase 2 | Complete |
 | BUGF-04 | Phase 2 | Complete |
-| BUGF-05 | Phase 03.1 | Pending |
-| BUGF-06 | Phase 03.1 | Pending |
-| BUGF-07 | Phase 03.1 | Pending |
-| BUGF-08 | Phase 03.1 | Pending |
-| BUGF-09 | Phase 03.1 | Pending |
-| BUGF-10 | Phase 03.1 | Pending |
+| BUGF-05 | Phase 03.1 | Implemented; verification pending |
+| BUGF-06 | Phase 03.1 | Implemented; verification pending |
+| BUGF-07 | Phase 03.1 | Implemented; verification pending |
+| BUGF-08 | Phase 03.1 | Implemented; verification pending |
+| BUGF-09 | Phase 03.1 | Implemented; verification pending |
+| BUGF-10 | Phase 03.1 | Implemented; verification pending |
 | REF-01 | Phase 3 | Complete |
 | REF-02 | Phase 3 | Complete |
 | REF-03 | Phase 3 | Complete |
@@ -92,4 +92,4 @@
 
 ---
 *Requirements defined: 2026-07-16*
-*Last updated: 2026-10-24 after adding Phase 03.1 (BUGF-05..10)*
+*Last updated: 2026-11-07: Phase 03.1 implemented; final verification and native UAT pending.*
